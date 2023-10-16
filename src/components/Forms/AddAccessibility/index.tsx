@@ -4,12 +4,10 @@ import { KeyboardAvoidingView, View, Dimensions } from 'react-native';
 
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-import firestore from '@react-native-firebase/firestore';
+import { Feather } from '@expo/vector-icons';
 
-import { Feather, FontAwesome } from '@expo/vector-icons';
-
-import * as Yup from 'yup';
-import { schema } from './schema';
+import { z } from 'zod';
+import { schema, FormData } from './zodSchema';
 
 import { Buttom } from '../../Basics/Buttom';
 import { Input } from '../../Basics/Input';
@@ -39,22 +37,23 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
     setLoading(true);
 
     if (accessibilities.length === 0) {
-      const error = {
+      addToast({
         type: 'error', 
         title: 'Ocorreu um erro', 
         description: 'Nenhuma acessibilidade cadastrada',
-      }
-      addToast(error);
-      setLoading(false);
-      return;
+      })
+
+      setLoading(false)
+      return
     } 
+
     getAccess(accessibilities);
 
-    setTimeout(() => {
-      onSubmit();
-      setLoading(false);
-      navigate('principal');
-    }, 1000);
+    // setTimeout(() => {
+    //   onSubmit();
+    //   setLoading(false);
+    //   navigate('principal');
+    // }, 1000);
   }
 
   async function handleAddAccess() {
@@ -65,42 +64,40 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
 
       if (!select) {
         setError(true);
-        await schema.validate(data, { abortEarly: false });
+        await schema.parseAsync(data)
         return;
       } 
         
       setError(false);
 
-      await schema.validate(data, { abortEarly: false });
+      await schema.parseAsync(data)
 
-      const access ={
-        descricao: data.accessibility,
-        acessibilidade: select.value,
-        icon: select.icon,
-      };
+      // const access ={
+      //   descricao: data.accessibility,
+      //   acessibilidade: select.value,
+      //   icon: select.icon,
+      // };
 
       setAccessibilities([
         ...accessibilities,
-        access,
+        // access,
       ]);  
       
-      const success = {
+      addToast({
         type: 'success', 
         title: 'Acessibilidade cadastrada', 
         description: 'Acessibilidade cadastrada com sucesso',
-      }
-      addToast(success);
+      })
 
     } catch (err) {
       const validationErrors = {};
       
-      if (err instanceof Yup.ValidationError) {
-        err.inner.forEach(error => {
-          validationErrors[error.path] = error.message;
+      if (err instanceof z.ZodError) {
+        err.errors.forEach(error => {
+          validationErrors[error.path[0]] = error.message;
         });
 
         formRef.current.setErrors(validationErrors);
-        console.log(validationErrors);
       }
     }
   }
@@ -119,17 +116,17 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
     useCallback (() => {
       setError(false);
 
-      const AccessOptions = () => {
-        firestore()
-          .collection('accessibility')
-          .get()
-          .then((value) => {
-            const data = value.docs.map(doc => doc.data())
-            setOptions(data);
-          })
-      }
+      // const AccessOptions = () => {
+      //   firestore()
+      //     .collection('accessibility')
+      //     .get()
+      //     .then((value) => {
+      //       const data = value.docs.map(doc => doc.data())
+      //       setOptions(data);
+      //     })
+      // }
   
-      AccessOptions();
+      // AccessOptions();
     }, [])
   );
 

@@ -8,6 +8,7 @@ export const Container = styled.View`
 
 export const Content = styled(LinearGradient)`
   flex: 1;
+  padding-top: 16px;
 `;
 
 export const Comments = styled.View`

@@ -11,6 +11,7 @@ import { Header } from '../../Header';
 import { Container, ComboBox, IconContainer, ModalContent, ModalHeader, ModalTitle, ModalSelect, SelectTitle } from './styles';
 
 export type SelectParam = {
+  label?: string
   icon: any
   incialValue?: string
   options: any
@@ -25,7 +26,7 @@ export function Select({ icon, incialValue = null, options, placeholder, header,
   const [openModal, setOpenModal] = useState(false);
   const [selectedValue, setSelectedValue] = useState(); 
 
-  function renderOption(item) {
+  function renderOption(item: any) {
     return (
       <OptionComponent 
         item={item}
@@ -66,6 +67,7 @@ export function Select({ icon, incialValue = null, options, placeholder, header,
             color={selectedValue ? '#000' : '#AEAEB3'}
           >
             {/* {selectedValue ? selectedValue.value : placeholder} */}
+            {placeholder}
           </SelectTitle>
           <FontAwesome5
             name='angle-down'

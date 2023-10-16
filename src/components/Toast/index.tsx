@@ -63,7 +63,6 @@ export function Toast({ message, removeToast }) {
         ],
         margin: 10,
         marginBottom: 5,
-        backgroundColor: '#FFF',
         padding: 10,
         borderRadius: 4,
         shadowColor: 'black',

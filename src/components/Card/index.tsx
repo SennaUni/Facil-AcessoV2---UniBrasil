@@ -4,61 +4,59 @@ import { View } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
 
-import firestore from '@react-native-firebase/firestore';
-
 import { Deatils } from '../Details';
-import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 
 import { Container, Icon, Header, Content, Address, AddressText, Buttons, IconButton } from './styles';
 
 export function Card({item}) {
 
-  const { dataAuth } = useAuth(); 
   const { addToast } = useToast();
 
-  const isFav = item.data.liked_by 
-    ? item.data.liked_by.includes(dataAuth.uid)
-    : false;
+  const isFav = false
+  // const isFav = item.data.liked_by 
+  //   ? item.data.liked_by.includes(dataAuth.uid)
+  //   : false;
 
   function addFavoritos() {
+    console.log('Adicionar aos Favoritos')
 
-    if (!dataAuth.uid) return;
+    // if (!dataAuth.uid) return;
 
-    const data = item.data.liked_by 
-      ? [...item.data.liked_by] 
-      : [];
+    // const data = item.data.liked_by 
+    //   ? [...item.data.liked_by] 
+    //   : [];
 
-      isFav
-      ? data.splice(data.findIndex(item => item === dataAuth.uid), 1)
-      : data.push(dataAuth.uid)
+    //   isFav
+    //   ? data.splice(data.findIndex(item => item === dataAuth.uid), 1)
+    //   : data.push(dataAuth.uid)
 
-    firestore()
-      .collection('comments')
-      .doc(item.id)
-      .update({
-        liked_by: data,
-      })
-      .then(() => {
-        const success = {
-          type: 'success', 
-          title: 'Operação realizada com sucesso', 
-          description: 'Comentário adicionado aos favoritos',
-        }
+    // firestore()
+    //   .collection('comments')
+    //   .doc(item.id)
+    //   .update({
+    //     liked_by: data,
+    //   })
+    //   .then(() => {
+    //     const success = {
+    //       type: 'success', 
+    //       title: 'Operação realizada com sucesso', 
+    //       description: 'Comentário adicionado aos favoritos',
+    //     }
 
-        addToast(success);
-      })
-      .catch((err) => { 
-        console.log(err)
+    //     addToast(success);
+    //   })
+    //   .catch((err) => { 
+    //     console.log(err)
 
-        const error = {
-          type: 'error', 
-          title: 'Ocorreu um erro', 
-          description: 'Erro ao favoritar comentário',
-        }
+    //     const error = {
+    //       type: 'error', 
+    //       title: 'Ocorreu um erro', 
+    //       description: 'Erro ao favoritar comentário',
+    //     }
 
-        addToast(error);
-        });
+    //     addToast(error);
+    //     });
   }
 
   return (

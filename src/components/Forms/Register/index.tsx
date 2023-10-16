@@ -127,7 +127,7 @@ export function Form() {
           icon="mail"
           placeholder="E-mail"
           keyboardType="email-address"
-          autoCapitalize='none' // primeira letra começa como minuscula
+          autoCapitalize='none'
         />
         <Input
           name="phoneNumber"
@@ -141,7 +141,7 @@ export function Form() {
           icon="handshake-o"
           placeholder="Defina a acessibilidade"
           header='Selecione sua acessibilidade'
-          // label="Usuario"
+          label="Usuario"
           OptionComponent={OptionSelect}
           onChange={setSelect}
         />

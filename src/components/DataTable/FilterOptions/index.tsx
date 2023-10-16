@@ -46,7 +46,7 @@ export function DataTable({ data, header, callBack, color = '#FFF' }) {
           keyExtractor={item => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          ListEmptyComponent={() => console.log('vazio')}
+          // ListEmptyComponent={() => console.log('vazio')}
           style={{ paddingHorizontal: 5 }}
         />
     </Container>

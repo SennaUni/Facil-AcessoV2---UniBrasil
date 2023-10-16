@@ -26,21 +26,21 @@ export function PasswordInput({ name, icon,...rest }) {
   }
 
   useEffect(() => {
-    registerField({
-      name: fieldName,
-      ref: inputRef.current,
-      path: 'value',
-      getValue: ref => {
-        return ref.value || ''
-      },
-      setValue: (ref, value) => {
-        ref.setNativeProps({ text: value });
-        ref.value = value
-      },
-      clearValue: ref => {
-        ref.value = ''
-      },
-    })
+    // registerField({
+    //   name: fieldName,
+    //   ref: inputRef.current,
+    //   path: 'value',
+    //   getValue: ref => {
+    //     return ref.value || ''
+    //   },
+    //   setValue: (ref, value) => {
+    //     ref.setNativeProps({ text: value });
+    //     ref.value = value
+    //   },
+    //   clearValue: ref => {
+    //     ref.value = ''
+    //   },
+    // })
   }, [fieldName, registerField])
 
   const handleChangeText = useCallback(text => {

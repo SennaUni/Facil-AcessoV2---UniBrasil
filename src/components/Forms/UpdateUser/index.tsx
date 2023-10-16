@@ -8,12 +8,8 @@ import { Form as Unform } from '@unform/mobile';
 
 import { Feather } from '@expo/vector-icons';
 
-import firestore from '@react-native-firebase/firestore';
-
-import auth from '@react-native-firebase/auth';
-
-import * as Yup from 'yup';
-import { schema } from './schema';
+import { z } from 'zod';
+import { schema, FormData } from './zodSchema';
 
 import { Input } from '../../Basics/Input';
 import { ArrowButtom } from '../../Basics/ArrowButtom';
@@ -21,7 +17,6 @@ import { Select } from '../../Basics/Select';
 import { Header } from '../../Header';
 import { OptionSelect } from '../../Basics/OptionSelect';
 import { useToast } from '../../../hooks/toast';
-import { useAuth } from '../../../hooks/auth';
 
 import { Container, ErrorContainer, Error } from './styles';
 
@@ -37,66 +32,66 @@ export function Form() {
 
   const { addToast } = useToast();
   const { navigate } = useNavigation();
-  const { dataAuth, updateValues } = useAuth();
+  // const { dataAuth, updateValues } = useAuth();
 
-  async function handleFirebaseUpdateUser({ email, name, phoneNumber }) {
-    const user = auth().currentUser;
+  // async function handleFirebaseUpdateUser({ email, name, phoneNumber }) {
+  //   const user = auth().currentUser;
 
-    auth()
-    .signInWithEmailAndPassword(dataAuth.email, dataAuth.password)
-    .then(async () => {
-      user.updateEmail(email);
-    })
-    .catch((err) => { console.log(err)
-      const error = {
-        type: 'error', 
-        title: 'Ocorreu um erro', 
-        description: 'Erro ao atualizar usuário',
-      }
+  //   auth()
+  //   .signInWithEmailAndPassword(dataAuth.email, dataAuth.password)
+  //   .then(async () => {
+  //     user.updateEmail(email);
+  //   })
+  //   .catch((err) => { console.log(err)
+  //     const error = {
+  //       type: 'error', 
+  //       title: 'Ocorreu um erro', 
+  //       description: 'Erro ao atualizar usuário',
+  //     }
 
-      addToast(error);
-    });
+  //     addToast(error);
+  //   });
 
-    firestore()
-      .collection('users')
-      .doc(dataAuth.uid)
-      .update({
-        name,
-        email,
-        phoneNumber,
-        accessibility: select.value,
-      })
-      .then(() => { 
-        const dataUpdate = {
-          name,
-          email,
-          phoneNumber,
-          accessibility: select.value,
-        };
+  //   firestore()
+  //     .collection('users')
+  //     .doc(dataAuth.uid)
+  //     .update({
+  //       name,
+  //       email,
+  //       phoneNumber,
+  //       accessibility: select.value,
+  //     })
+  //     .then(() => { 
+  //       const dataUpdate = {
+  //         name,
+  //         email,
+  //         phoneNumber,
+  //         accessibility: select.value,
+  //       };
 
-        updateValues(dataUpdate)
+  //       updateValues(dataUpdate)
         
-        const success = {
-          type: 'success', 
-          title: 'Usuário atualizado com sucesso', 
-          description: 'Tome cuidado na proxima vez',
-        }
+  //       const success = {
+  //         type: 'success', 
+  //         title: 'Usuário atualizado com sucesso', 
+  //         description: 'Tome cuidado na proxima vez',
+  //       }
 
-        addToast(success);
-      })
-      .catch((err) => { console.log(err)
-        const error = {
-          type: 'error', 
-          title: 'Ocorreu um erro', 
-          description: 'Erro ao atualizar usuário',
-        }
+  //       addToast(success);
+  //     })
+  //     .catch((err) => { console.log(err)
+  //       const error = {
+  //         type: 'error', 
+  //         title: 'Ocorreu um erro', 
+  //         description: 'Erro ao atualizar usuário',
+  //       }
 
-        addToast(error);
-        })
-        .finally(() => setLoading(false));
-  }
+  //       addToast(error);
+  //       })
+  //       .finally(() => setLoading(false));
+  // }
 
-  async function handleUpdateUser(data) { 
+  async function handleUpdateUser(data: FormData) { 
     setLoading(true);
 
     try {
@@ -105,18 +100,18 @@ export function Form() {
       if (!select) {
         setError(true);
 
-        await schema.validate(data, { abortEarly: false });
+        await schema.parseAsync(data);
 
         return;
       } else {
         setError(false);
       }
 
-      await schema.validate(data, { abortEarly: false });
+      await schema.parseAsync(data);
 
-      await handleFirebaseUpdateUser(data);
+      // await handleFirebaseUpdateUser(data);
 
-      navigate('perfil');
+      // navigate('perfil');
 
       // setTimeout(() => {
       //   navigate('perfil');
@@ -125,9 +120,9 @@ export function Form() {
     } catch (err) {
       const validationErrors = {};
       
-      if (err instanceof Yup.ValidationError) {
-        err.inner.forEach(error => {
-          validationErrors[error.path] = error.message;
+      if (err instanceof z.ZodError) {
+        err.errors.forEach(error => {
+          validationErrors[error.path[0]] = error.message;
         });
 
         formRef.current.setErrors(validationErrors);
@@ -139,28 +134,28 @@ export function Form() {
 
   useFocusEffect(
     useCallback (() => {
-      const acessibilityOptions = () => {
-        firestore()
-          .collection('accessibility')
-          .get()
-          .then((value) => {
-            const data = value.docs.map(doc => {
-              return {
-                ...doc.data(),
-              }
-            })
-            setOptions(data);
-          })
-      }
+      // const acessibilityOptions = () => {
+      //   firestore()
+      //     .collection('accessibility')
+      //     .get()
+      //     .then((value) => {
+      //       const data = value.docs.map(doc => {
+      //         return {
+      //           ...doc.data(),
+      //         }
+      //       })
+      //       setOptions(data);
+      //     })
+      // }
 
-      acessibilityOptions();
+      // acessibilityOptions();
 
-      formRef.current.setData({
-        name: dataAuth.name,
-        email: dataAuth.email,
-        phoneNumber: dataAuth.phoneNumber,
-      })  
-    }, [dataAuth])
+      // formRef.current.setData({
+      //   name: dataAuth.name,
+      //   email: dataAuth.email,
+      //   phoneNumber: dataAuth.phoneNumber,
+      // })  
+    }, [])
   );
 
   return (
@@ -203,7 +198,7 @@ export function Form() {
           />
           <Select 
             options={options}
-            incialValue={dataAuth.accessibility}
+            // incialValue={dataAuth.accessibility}
             icon="handshake-o"
             placeholder="Defina a acessibilidade"
             header='Selecione sua acessibilidade'

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -8,14 +8,13 @@ import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawe
 
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 
-import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 
 import { Container, Header, HeaderImage, HeaderText, DrawerOptions, Footer, FooterButtons, FooterText } from './styles';
 
 export function CustomDrawer( props ) {
 
-  const { dataAuth, signOut } = useAuth();
+  // const { dataAuth, signOut } = useAuth();
   const { navigate } = useNavigation();
   const { addToast } = useToast();
   
@@ -23,7 +22,6 @@ export function CustomDrawer( props ) {
   return (
      <Container colors={[ '#8241B8', '#6C33A3' ]}>
       <DrawerContentScrollView 
-        // contentContainerStyle={{}}
         {...props} 
       >
         <Header>
@@ -32,7 +30,8 @@ export function CustomDrawer( props ) {
               
             />
             <HeaderText>
-              { dataAuth.name ? 'Olá, ' + dataAuth.name  : 'Bem vindo, Visitante'}
+              {/* { dataAuth.name ? 'Olá, ' + dataAuth.name  : 'Bem vindo, Visitante'} */}
+              { 'Bem vindo, Visitante'}
             </HeaderText>
           </View>
         </Header>
@@ -54,7 +53,7 @@ export function CustomDrawer( props ) {
         </FooterButtons>
         <FooterButtons
           onPress={() => {
-            signOut();
+            // signOut();
             
             const success = {
               type: 'success', 
@@ -62,8 +61,8 @@ export function CustomDrawer( props ) {
               description: 'Até a próxima',
             }
       
-            addToast(success); 
-            navigate('principal');
+            // addToast(success); 
+            // navigate('principal');
           }}
         >
           <MaterialIcons 
@@ -77,13 +76,4 @@ export function CustomDrawer( props ) {
       </Footer>
     </Container>
   )
-};
-
-const styles = StyleSheet.create({
-  containerImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-    backgroundColor: '#000',
-  },
-});
+}

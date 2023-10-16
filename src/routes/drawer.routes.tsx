@@ -2,18 +2,18 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import { FontAwesome } from '@expo/vector-icons';
 
-// import { Principal } from '../screens/Principal';
 import { Register } from '../screens/Register';
 import { Login } from '../screens/Login';
 import { ForgotPassword } from '../screens/ForgotPassword'
-// import { Profile } from '../screens/Profile';
-// import { UpdateUser } from '../screens/UpdateUser'
-// import { UpdatePassword } from '../screens/UpdatePassword'
-// import { RegisterComment } from '../screens/RegisterComment'
-// import { MyComments } from '../screens/MyComments'
-// import { MyFavorites } from '../screens/MyFavorites'
+import { Principal } from '../screens/Principal';
+import { Profile } from '../screens/Profile';
+import { UpdateUser } from '../screens/UpdateUser'
+import { UpdatePassword } from '../screens/UpdatePassword'
+import { RegisterComment } from '../screens/RegisterComment'
+import { MyComments } from '../screens/MyComments'
+import { MyFavorites } from '../screens/MyFavorites'
 
-// import { CustomDrawer } from '../components/CustomDrawer';
+import { CustomDrawer } from '../components/CustomDrawer';
 
 // import { useAuth } from '../hooks/auth';
 
@@ -21,9 +21,16 @@ export type RootDrawerNavigator = {
     forgotPassword: undefined
     register: undefined
     login: undefined
+    principal: undefined
+    perfil: undefined
+    updateUser: undefined
+    updatePassword: undefined
+    registerComment: undefined
+    myComments: undefined
+    myFavorites: undefined
 }
 
-const { Screen, Navigator, Group } = createDrawerNavigator<RootDrawerNavigator>();
+const { Screen, Navigator } = createDrawerNavigator<RootDrawerNavigator>()
 
 export function DrawerRoutes() {
 
@@ -31,16 +38,17 @@ export function DrawerRoutes() {
 
     return (
         <Navigator
-            // drawerContent={props => <CustomDrawer {...props} />}
+            drawerContent={props => <CustomDrawer {...props} />}
             screenOptions={{
                 headerShown: false,
                 drawerActiveBackgroundColor: '#FFF',
                 drawerActiveTintColor: '#6441A5',
                 drawerInactiveTintColor: '#FFF',
                 drawerLabelStyle: { marginLeft: -20, fontSize: 15 },
+                swipeEdgeWidth: 200
             }}
         >
-            {/* { dataAuth.uid ? (
+            {/* { dataAuth.uid ? (  */}
                 <>
                     <Screen 
                         name='principal'
@@ -104,19 +112,19 @@ export function DrawerRoutes() {
                         options={{
                             drawerIcon: ({ color }) => <FontAwesome name="heart" size={22} color={color} />,
                             title: 'Comentários favoritos'
-                        }}
+                        }} 
                     />
                 </>
-            ) : ( */}
+            {/* ) : ( */}
             <>
-                {/* <Screen 
-                        name='principal'
-                        component={Principal}
-                        options={{
-                            drawerIcon: ({ color }) => <FontAwesome name="home" size={22} color={color} />,
-                            title: 'Home'
-                        }}
-                    /> */}
+                {/* <Screen
+                    name='principal'
+                    component={Principal}
+                    options={{
+                        drawerIcon: ({ color }) => <FontAwesome name="home" size={22} color={color} />,
+                        title: 'Home'
+                    }}
+                />
                 <Screen
                     name='login'
                     component={Login}
@@ -140,7 +148,7 @@ export function DrawerRoutes() {
                         drawerIcon: ({ color }) => <FontAwesome name="user-plus" size={22} color={color} />,
                         title: 'Crie sua conta'
                     }}
-                />
+                /> */}
             </>
             {/* )} */}
         </Navigator>
