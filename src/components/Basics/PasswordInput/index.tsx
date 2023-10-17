@@ -1,100 +1,89 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 
-import { TouchableOpacity } from 'react-native';
+import { TextInputProps, TouchableOpacity } from 'react-native';
 
 import { Feather } from '@expo/vector-icons';
 
-import { useField } from '@unform/core'
+import { Control, Controller } from 'react-hook-form';
 
-import { Container, IconContainer, InputText, ErrorContainer, Error } from './styles';
+import { Container, IconContainer, InputText, ErrorContainer, Error, RenderContainer, InputContainer } from './styles';
 
-export function PasswordInput({ name, icon,...rest }) {
-  const inputRef = useRef(null)
+export interface InputProps extends TextInputProps {
+  name: string
+  icon: string
+  defaultValue?: string
+  control: Control
+}
 
-  const { fieldName, registerField, defaultValue, error } = useField(name);
+export function PasswordInput({ name, icon, defaultValue, control, ...rest }: InputProps) {
 
-  const [isFocused, setIsFocused] = useState(false);
-  const [isFilled, setIsFilled] = useState(false);
-  const [secutiryText, setSecurityText] = useState(true);
+  const [secutiryText, setSecurityText] = useState<boolean>(true);
+  const [isFocused, setIsFocused] = useState<boolean>(false)
+  const [isFilled, setIsFilled] = useState<boolean>(false)
 
-  function handleInputFocus() {
-    setIsFocused(true);
-  }
+  const handleInputFocus = () => setIsFocused(true)
 
-  function handleInputBlur() {
-    setIsFocused(false);
-  }
-
-  useEffect(() => {
-    // registerField({
-    //   name: fieldName,
-    //   ref: inputRef.current,
-    //   path: 'value',
-    //   getValue: ref => {
-    //     return ref.value || ''
-    //   },
-    //   setValue: (ref, value) => {
-    //     ref.setNativeProps({ text: value });
-    //     ref.value = value
-    //   },
-    //   clearValue: ref => {
-    //     ref.value = ''
-    //   },
-    // })
-  }, [fieldName, registerField])
-
-  const handleChangeText = useCallback(text => {
-    setIsFilled(true)
-    if (text.length === 0) setIsFilled(false)
-    if (inputRef.current) inputRef.current.value = text;
-  }, []);
+  const handleInputFilled = (value: string) => setIsFilled(!!value)
 
   return (
     <>
       <Container >
-        <IconContainer isFocused={isFocused}>
-          <Feather
-            name={icon}
-            size={24}
-            color={(isFocused || isFilled) ? '#6441A5' : '#AEAEB3'}
-          />
-        </IconContainer>
-
-        <InputText
-          ref={inputRef}
+        <Controller
+          name={name}
+          control={control}
           defaultValue={defaultValue}
-          onChangeText={handleChangeText}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          isFocused={isFocused}
-          secureTextEntry={secutiryText}
-          {...rest}
+          render={({ field: { onChange, value }, formState: { errors } }) => (
+            <RenderContainer>
+              <InputContainer>
+                <IconContainer
+                  isFocused={isFocused}
+                >
+                  <Feather
+                    name={icon as any}
+                    size={24}
+                    color={(isFocused || isFilled) ? '#6441A5' : '#AEAEB3'}
+                  />
+                </IconContainer>
+                <InputText
+                  onChangeText={(value: string) => {
+                    onChange(value)
+                    handleInputFilled(value)
+                  }}
+                  value={value}
+                  onFocus={handleInputFocus}
+                  isFocused={isFocused}
+                  secureTextEntry={secutiryText}
+                  {...rest}
+                />
+                {isFilled && (
+                  <IconContainer isFocused={isFocused}>
+                    <TouchableOpacity
+                      onPress={() => setSecurityText(!secutiryText)}
+                    >
+                      <Feather
+                        name={secutiryText ? 'eye' : 'eye-off'}
+                        size={24}
+                        color={'#6441A5'}
+                      />
+                    </TouchableOpacity>
+                  </IconContainer>
+                )}
+              </InputContainer>
+
+              {errors[name] &&
+                <ErrorContainer>
+                  <Feather
+                    name="alert-triangle"
+                    size={24}
+                    color="#DC1637"
+                  />
+                  <Error>{errors[name].message}</Error>
+                </ErrorContainer>
+              }
+            </RenderContainer>
+          )}
         />
-
-        {isFilled ? (
-          <IconContainer isFocused={isFocused}>
-           <TouchableOpacity
-             onPress={() => setSecurityText(!secutiryText)}
-           >
-             <Feather
-               name={secutiryText ? 'eye' : 'eye-off'}
-               size={24}
-               color={'#6441A5'}
-             />
-           </TouchableOpacity>
-         </IconContainer>
-        ) : ''}
-
       </Container>
-      { error && 
-        <ErrorContainer>
-          <Feather 
-            name="alert-triangle" 
-            size={24} 
-            color="#DC1637"
-          />
-          <Error>{error}</Error>
-        </ErrorContainer>}
     </>
   );
 }

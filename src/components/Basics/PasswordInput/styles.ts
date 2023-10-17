@@ -8,6 +8,16 @@ export const Container = styled.View`
   margin: 5px 0;
 `;
 
+export const RenderContainer = styled.View`
+  width: 100%;
+  flex-direction: column;
+`
+
+export const InputContainer = styled.View`
+  width: 100%;
+  flex-direction: row;
+`
+
 export const IconContainer = styled.View`
   height: 50px;
   width: 55px;

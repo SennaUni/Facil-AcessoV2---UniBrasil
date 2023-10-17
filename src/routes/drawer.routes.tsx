@@ -49,7 +49,7 @@ export function DrawerRoutes() {
             }}
         >
             {/* { dataAuth.uid ? (  */}
-                <>
+                {/* <>
                     <Screen 
                         name='principal'
                         component={Principal}
@@ -114,7 +114,7 @@ export function DrawerRoutes() {
                             title: 'Comentários favoritos'
                         }} 
                     />
-                </>
+                </> */}
             {/* ) : ( */}
             <>
                 {/* <Screen
@@ -124,7 +124,7 @@ export function DrawerRoutes() {
                         drawerIcon: ({ color }) => <FontAwesome name="home" size={22} color={color} />,
                         title: 'Home'
                     }}
-                />
+                /> */}
                 <Screen
                     name='login'
                     component={Login}
@@ -148,7 +148,7 @@ export function DrawerRoutes() {
                         drawerIcon: ({ color }) => <FontAwesome name="user-plus" size={22} color={color} />,
                         title: 'Crie sua conta'
                     }}
-                /> */}
+                />
             </>
             {/* )} */}
         </Navigator>
