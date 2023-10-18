@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { loginAsync } from '../../../store/slices/authSlice';
 
@@ -37,27 +37,14 @@ export function Form() {
   const { navigate } = useNavigation()
   const { addToast } = useToast()
 
-  const {
-    user,
-    loading,
-    error,
-  } = useAppSelector((state) => state.auth)
+  const { loading, error, sucess } = useAppSelector((state) => state.auth)
 
   async function handleUserLogin(data: FormData) {
-    console.log('data', data)
-
     try {
       dispatch(loginAsync({
-        login: 'mirandaTeste',
-        senha: '123'
+        login: data.user,
+        senha: data.password
       }))
-
-      addToast({
-        title: 'Login realizado com sucesso!',
-        description: 'Seja bem vindo ao fácil acesso',
-        type: 'success'
-      })
-
     } catch (err) {
       addToast({
         title: 'Ops, ocorreu um erro!',
@@ -66,6 +53,26 @@ export function Form() {
       })
     }
   }
+
+  useEffect(() => {
+    if (sucess) {
+      addToast({
+        title: 'Login realizado com sucesso!',
+        description: 'Seja bem vindo ao fácil acesso',
+        type: 'success'
+      })
+
+      navigate("principal" as never)
+    }
+
+    if (error) {
+      addToast({
+        title: 'Ops, ocorreu um erro!',
+        description: error,
+        type: 'error'
+      })
+    }
+  }, [error, sucess])
 
   return (
     <Container>
@@ -89,11 +96,11 @@ export function Form() {
         />
 
         <Input
-          name="email"
+          name="user"
           icon="mail"
-          placeholder="E-mail"
-          keyboardType="email-address"
-          autoCapitalize='none'
+          placeholder="Usuário"
+          // keyboardType="email-address"
+          // autoCapitalize='none'
           control={control}
         />
 

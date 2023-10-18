@@ -1,9 +1,9 @@
-import styled from 'styled-components/native';
+import styled, { css } from 'styled-components/native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
 export const Container = styled.View`
-  flex-direction: row;
+  flex-direction: column;
   padding: 0 20px;
   margin: 10px 0 0;
 `;
@@ -18,7 +18,16 @@ export const ComboBox = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+
+  ${({ isFocused }) => isFocused && css`
+    border-bottom-width: 3px; 
+  `};
 `;
+
+export const InputContainer = styled.View`
+  width: 100%;
+  flex-direction: row;
+`
 
 export const IconContainer = styled.View`
   height: 50px;
@@ -28,6 +37,10 @@ export const IconContainer = styled.View`
   background-color: #FFFFFF;
   border-bottom-width: 1px;
   border-bottom-color: #6441A5;  
+
+  ${({ isFocused }) => isFocused && css`
+    border-bottom-width: 3px; 
+  `};
 `;
 
 export const ModalContent = styled(LinearGradient)`
@@ -59,3 +72,19 @@ export const ModalSelect = styled.View`
   border-top-left-radius: 35px;
   border-top-right-radius: 35px;
 `;
+
+export const ErrorContainer = styled.View`
+  width: 100%;
+  flex-direction: column;
+`
+
+export const ErrorContent = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin: 5px 0 5px; 
+  padding: 0 20px;
+`
+export const Error = styled.Text`
+  margin-left: 5px;
+  color: #DC1637;
+`

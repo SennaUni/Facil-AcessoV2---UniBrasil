@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import { LoginApiParams, loginApiRequest } from '../../api/authRequests';
+import { CreateUserParams, createUserApiRequest } from '../../api/authRequests';
 
 export interface Root {
   usuario: Usuario
@@ -34,13 +35,15 @@ export interface Acessibilidade {
 export interface AuthState {
   user: Usuario | null;
   loading: 'idle' | 'pending';
-  error: any | false;
+  error: any | boolean;
+  sucess: any | boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   loading: 'idle',
   error: false,
+  sucess: false
 }
 
 export const loginAsync = createAsyncThunk('auth/login', async (data: LoginApiParams, { rejectWithValue }) => {
@@ -48,7 +51,7 @@ export const loginAsync = createAsyncThunk('auth/login', async (data: LoginApiPa
     const response = await loginApiRequest(data)
     return response;
   } catch (error) {
-    return rejectWithValue(error.response);
+    return rejectWithValue(error.message)
   }
 })
 
@@ -61,14 +64,17 @@ const authSlice = createSlice({
       .addCase(loginAsync.pending, (state) => {
         state.loading = 'pending';
         state.error = false;
+        state.sucess = false;
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
         state.loading = 'idle';
         state.user = action.payload;
+        state.sucess = true;
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = 'idle';
-        state.error = action.payload ? action.payload as string : 'Erro desconhecido';
+        state.error = action.payload ? action.payload : 'Erro desconhecido';
+        state.sucess = false;
       })
   }
 })

@@ -21,7 +21,7 @@ export function PasswordInput({ name, icon, defaultValue, control, ...rest }: In
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [isFilled, setIsFilled] = useState<boolean>(false)
 
-  const handleInputFocus = () => setIsFocused(true)
+  const handleInputFocus = (value: boolean) => setIsFocused(value)
 
   const handleInputFilled = (value: string) => setIsFilled(!!value)
 
@@ -50,7 +50,8 @@ export function PasswordInput({ name, icon, defaultValue, control, ...rest }: In
                     handleInputFilled(value)
                   }}
                   value={value}
-                  onFocus={handleInputFocus}
+                  onFocus={() => handleInputFocus(true)}
+                  onBlur={() => handleInputFocus(false)}
                   isFocused={isFocused}
                   secureTextEntry={secutiryText}
                   {...rest}

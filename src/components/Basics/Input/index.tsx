@@ -19,7 +19,7 @@ export function Input({ name, icon, defaultValue, control, ...rest }: InputProps
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [isFilled, setIsFilled] = useState<boolean>(false)
 
-  const handleInputFocus = () => setIsFocused(true)
+  const handleInputFocus = (value: boolean) => setIsFocused(value)
 
   const handleInputFilled = (value: string) => setIsFilled(!!value)
 
@@ -48,7 +48,8 @@ export function Input({ name, icon, defaultValue, control, ...rest }: InputProps
                     handleInputFilled(value)
                   }}
                   value={value}
-                  onFocus={handleInputFocus}
+                  onFocus={() => handleInputFocus(true)}
+                  onBlur={() => handleInputFocus(false)}
                   isFocused={isFocused}
                   {...rest}
                 />

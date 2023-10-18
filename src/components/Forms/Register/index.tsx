@@ -1,15 +1,16 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { View, Dimensions } from 'react-native';
 
-import { Form as Unform } from '@unform/mobile';
+import { useFocusEffect } from '@react-navigation/native';
 
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { createUserApiRequest } from '../../../api/authRequests';
 
-import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-import { z } from 'zod';
 import { schema, FormData } from './zodSchema';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Input } from '../../Basics/Input';
 import { PasswordInput } from '../../Basics/PasswordInput';
@@ -19,82 +20,56 @@ import { ArrowButtom } from '../../Basics/ArrowButtom';
 import { Header } from '../../Header';
 import { useToast } from '../../../hooks/toast';
 
-import { Container, ErrorContainer, Error } from './styles';
+import { Container } from './styles';
 
 const { width } = Dimensions.get('window');
 
 export function Form() {
-  const formRef = useRef(null);
+  const [loading, setLoading] = useState(false)
 
-  const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState([]);
-  const [select, setSelect] = useState('');
-  const [error, setError] = useState(false);
+  const { handleSubmit, control, reset, setValue } = useForm<FormData>({
+    resolver: zodResolver(schema)
+  })
 
-  const { addToast } = useToast();
-  const { navigate } = useNavigation();
+  const { addToast } = useToast()
+  const { navigate } = useNavigation()
 
-  async function handleUserRegister(data) {
-    setLoading(true);
+  async function handleUserRegister(data: FormData) {
+    setLoading(true)
 
     try {
-      formRef.current.setErrors({});
+      await createUserApiRequest({
+        login: data.name,
+        senha: data.password,
+        telefone: data.phoneNumber,
+        cpf: data.document,
+        acessibilidade: [data.acessibility.id],
+        email: data.email
+      })
 
-      if (!select) {
-        setError(true);
+      addToast({
+        title: 'Operação realizada com sucesso!',
+        description: `Usuário ${data.name} cadastrado`,
+        type: 'success'
+      })
 
-        await schema.parseAsync(data);
-
-        return;
-      } else {
-        setError(false);
-      }
-
-      await schema.parseAsync(data);
-
+      navigate('login' as never)
     } catch (err) {
-      const validationErrors = {};
-
-      if (err instanceof z.ZodError) {
-        err.errors.forEach(error => {
-          validationErrors[error.path[0]] = error.message;
-        });
-
-        formRef.current.setErrors(validationErrors);
-      }
-
-      setLoading(false);
+      addToast({
+        title: 'Ops, ocorreu um erro!',
+        description: err.message,
+        type: 'error'
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const acessibilityOptions = () => {
-  //       firestore()
-  //         .collection('accessibility')
-  //         .get()
-  //         .then((value) => {
-  //           const data = value.docs.map(doc => {
-  //             return {
-  //               ...doc.data(),
-  //             }
-  //           })
-  //           setOptions(data);
-  //         })
-  //     }
-
-  //     acessibilityOptions();
-
-  //     formRef.current.setData({
-  //       name: '',
-  //       email: '',
-  //       phoneNumber: '',
-  //       accessibility: '',
-  //       password: '',
-  //       passwordConfirm: '',
-  //     })
-  //   }, [])
-  // );
+  useFocusEffect(
+    useCallback(() => {
+      reset()
+    }, [reset])
+  )
 
   return (
     <Container>
@@ -108,7 +83,7 @@ export function Form() {
         <ArrowButtom
           loading={loading}
           gradient={['#A88BEB', '#8241B8']}
-          onPress={() => formRef.current.submitForm()}
+          onPress={handleSubmit(handleUserRegister)}
         />
       </View>
 
@@ -116,57 +91,67 @@ export function Form() {
         title='Criar usuário'
       />
 
-      <Unform ref={formRef} onSubmit={handleUserRegister} style={{ marginVertical: 0 }}>
-        <Input
-          name="name"
-          icon="user"
-          placeholder="Nome"
-        />
-        <Input
-          name="email"
-          icon="mail"
-          placeholder="E-mail"
-          keyboardType="email-address"
-          autoCapitalize='none'
-        />
-        <Input
-          name="phoneNumber"
-          icon="phone"
-          placeholder="Telefone para contato"
-          keyboardType="phone-pad"
-        />
+      <Input
+        name="name"
+        icon="user"
+        placeholder="Nome"
+        control={control}
+      />
 
-        <Select
-          options={options}
-          icon="handshake-o"
-          placeholder="Defina a acessibilidade"
-          header='Selecione sua acessibilidade'
-          label="Usuario"
-          OptionComponent={OptionSelect}
-          onChange={setSelect}
-        />
-        {error && (
-          <ErrorContainer>
-            <Feather
-              name="alert-triangle"
-              size={24}
-              color="#DC1637"
-            />
-            <Error> Selecione uma opção </Error>
-          </ErrorContainer>
-        )}
+      <Input
+        name="email"
+        icon="mail"
+        placeholder="E-mail"
+        keyboardType="email-address"
+        autoCapitalize='none'
+        control={control}
+      />
 
-        <PasswordInput
-          name="password"
-          icon="lock"
-          placeholder="Senha"
-        />
-        <PasswordInput
-          name="passwordConfirm"
-          icon="lock"
-          placeholder="Confirme a senha"
-        />
-      </Unform>
+      <Input
+        name="phoneNumber"
+        icon="phone"
+        placeholder="Telefone para contato"
+        keyboardType="phone-pad"
+        control={control}
+      />
+
+      <Input
+        name="document"
+        icon="check-circle"
+        placeholder="Cpf"
+        keyboardType="number-pad"
+        control={control}
+      />
+
+      <Select
+        name="acessibility"
+        icon="handshake-o"
+        placeholder="Defina a acessibilidade"
+        header='Selecione sua acessibilidade'
+        label="Usuario"
+        OptionComponent={OptionSelect}
+        onChange={setValue}
+        control={control}
+        options={[
+          { id: 1, icon: 'phone', value: 'teste' },
+          { id: 2, icon: 'phone', value: 'teste' },
+          { id: 3, icon: 'phone', value: 'teste' },
+          { id: 4, icon: 'phone', value: 'teste' },
+        ]}
+      />
+
+      <PasswordInput
+        name="password"
+        icon="lock"
+        placeholder="Senha"
+        control={control}
+      />
+      <PasswordInput
+        name="passwordConfirm"
+        icon="lock"
+        placeholder="Confirme a senha"
+        control={control}
+      />
     </Container>
   )
 }

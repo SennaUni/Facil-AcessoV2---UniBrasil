@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import { TouchableOpacity, StatusBar } from 'react-native';
 
@@ -21,11 +21,7 @@ export function Principal() {
 
   const { navigate } = useNavigation();
 
-  const {
-    user,
-    loading,
-    error,
-  } = useAppSelector((state) => state.auth)
+  const { user } = useAppSelector((state) => state.auth)
 
   const dados = commentsOptions
 
@@ -86,7 +82,11 @@ export function Principal() {
       CommercesOptions();
       Subscriber();
     }, [])
-  );
+  )
+
+  useEffect(() => {
+    if (!user) navigate("login" as never)
+  }, [user])
 
   return (
     <Container
