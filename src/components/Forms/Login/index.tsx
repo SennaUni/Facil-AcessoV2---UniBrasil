@@ -39,6 +39,10 @@ export function Form() {
 
   const { loading, error, sucess } = useAppSelector((state) => state.auth)
 
+  // const loading = useAppSelector((state) => state.auth && state.auth.loading)
+  // const error = useAppSelector((state) => state.auth && state.auth.error)
+  // const sucess = useAppSelector((state) => state.auth && state.auth.sucess)
+
   async function handleUserLogin(data: FormData) {
     try {
       dispatch(loginAsync({

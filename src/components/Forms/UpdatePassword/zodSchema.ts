@@ -1,16 +1,24 @@
 import { z } from 'zod';
 
 export const schema = z.object({
-    oldPassword: z.string()
+    oldPassword: z.string({
+        required_error: 'Informe a senha atual'
+    })
         .min(6, "A senha deve ter ao menos 6 dígitos")
-        .nonempty("Informe a sua senha atual"),
-    newPassword: z.string()
+        .refine(value => value.trim() !== '', "Informe a senha atual"),
+    newPassword: z.string({
+        required_error: 'Informe a nova atual'
+    })
         .min(6, "A senha deve ter ao menos 6 dígitos")
-        .nonempty("Informe a sua nova senha"),
-    newPasswordConfirm: z.string()
+        .refine(value => value.trim() !== '', "Informe a senha nova"),
+    newPasswordConfirm: z.string({
+        required_error: 'Informe a confirmação de senha'
+    })
         .min(6, "A senha deve ter ao menos 6 dígitos")
-        .nonempty("Informe a confirmação de senha")
-        // .refine((val, ctx) => val === ctx.parent.newPassword, 'A confirmação esta incorreta'),
+        .refine(value => value.trim() !== '', "Informe a confirmação de senha"),
+}).refine(value => value.newPasswordConfirm === value.newPassword, {
+    message: "A senha de confirmação não confere",
+    path: ['newPasswordConfirm']
 })
 
 export type FormData = z.infer<typeof schema>;

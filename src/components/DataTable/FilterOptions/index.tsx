@@ -6,7 +6,20 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { Container, Header, Content, Icon, Label } from './styles';
 
-export function DataTable({ data, header, callBack, color = '#FFF' }) {
+export type DataTableParams = {
+  data: DataType[]
+  header: string
+  callBack: (item: DataType) => void
+  color?: string
+}
+
+export type DataType = {
+  id: number
+  descricao: string
+  icon: string
+}
+
+export function DataTable({ data, header, callBack, color = '#FFF' }: DataTableParams) {
 
   function loop({ item }) {
     return(
@@ -27,7 +40,7 @@ export function DataTable({ data, header, callBack, color = '#FFF' }) {
         <Label
           color={color}
         >
-          {item.value}
+          {item.descricao}
         </Label>
       </Content>
     )

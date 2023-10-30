@@ -4,11 +4,14 @@ import { KeyboardAvoidingView, View, Dimensions } from 'react-native';
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-import { Form as Unform } from '@unform/mobile';
+import { listAcessibility } from '../../../store/slices/acessibilitySlice';
+import { updateProfileAsync } from '../../../store/slices/authSlice';
 
-import { Feather } from '@expo/vector-icons';
+import { useToast } from '../../../hooks/toast';
+import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod'
 
-import { z } from 'zod';
 import { schema, FormData } from './zodSchema';
 
 import { Input } from '../../Basics/Input';
@@ -16,207 +19,154 @@ import { ArrowButtom } from '../../Basics/ArrowButtom';
 import { Select } from '../../Basics/Select';
 import { Header } from '../../Header';
 import { OptionSelect } from '../../Basics/OptionSelect';
-import { useToast } from '../../../hooks/toast';
 
-import { Container, ErrorContainer, Error } from './styles';
+import { Container } from './styles';
 
 const { width } = Dimensions.get('window');
 
 export function Form() {
-  const formRef = useRef(null)
+  const [loading, setLoading] = useState(false)
 
-  const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState([]);
-  const [select, setSelect] = useState('');
-  const [error, setError] = useState(false);
+  const { handleSubmit, control, formState, setValue } = useForm<FormData>({
+    resolver: zodResolver(schema)
+  })
 
-  const { addToast } = useToast();
-  const { navigate } = useNavigation();
-  // const { dataAuth, updateValues } = useAuth();
+  const { addToast } = useToast()
+  const { navigate } = useNavigation()
+  const dispatch = useAppDispatch()
 
-  // async function handleFirebaseUpdateUser({ email, name, phoneNumber }) {
-  //   const user = auth().currentUser;
+  const { user } = useAppSelector((state) => state.auth)
+  const { acessibility } = useAppSelector((state) => state.acessibility)
 
-  //   auth()
-  //   .signInWithEmailAndPassword(dataAuth.email, dataAuth.password)
-  //   .then(async () => {
-  //     user.updateEmail(email);
-  //   })
-  //   .catch((err) => { console.log(err)
-  //     const error = {
-  //       type: 'error', 
-  //       title: 'Ocorreu um erro', 
-  //       description: 'Erro ao atualizar usuário',
-  //     }
+  const selectOptions = acessibility
+    ? acessibility.map(value => ({
+      id: value.id,
+      icon: value.icon,
+      value: value.descricao,
+    }))
+    : []
 
-  //     addToast(error);
-  //   });
-
-  //   firestore()
-  //     .collection('users')
-  //     .doc(dataAuth.uid)
-  //     .update({
-  //       name,
-  //       email,
-  //       phoneNumber,
-  //       accessibility: select.value,
-  //     })
-  //     .then(() => { 
-  //       const dataUpdate = {
-  //         name,
-  //         email,
-  //         phoneNumber,
-  //         accessibility: select.value,
-  //       };
-
-  //       updateValues(dataUpdate)
-        
-  //       const success = {
-  //         type: 'success', 
-  //         title: 'Usuário atualizado com sucesso', 
-  //         description: 'Tome cuidado na proxima vez',
-  //       }
-
-  //       addToast(success);
-  //     })
-  //     .catch((err) => { console.log(err)
-  //       const error = {
-  //         type: 'error', 
-  //         title: 'Ocorreu um erro', 
-  //         description: 'Erro ao atualizar usuário',
-  //       }
-
-  //       addToast(error);
-  //       })
-  //       .finally(() => setLoading(false));
-  // }
-
-  async function handleUpdateUser(data: FormData) { 
-    setLoading(true);
+  async function handleUpdateUser(data: FormData) {
+    setLoading(true)
 
     try {
-      formRef.current.setErrors({});
+      dispatch(updateProfileAsync({
+        id: user.id,
+        data: {
+          login: data.name,
+          dataNascimento: '',
+          telefone: data.phoneNumber.toString(),
+          cpf: data.document,
+          acessibilidade: [Number(data.acessibility.id)],
+          email: data.email
+        }
+      }))
 
-      if (!select) {
-        setError(true);
+      addToast({
+        title: 'Operação realizada com sucesso!',
+        description: `Usuário ${data.name} editado`,
+        type: 'success'
+      })
 
-        await schema.parseAsync(data);
-
-        return;
-      } else {
-        setError(false);
-      }
-
-      await schema.parseAsync(data);
-
-      // await handleFirebaseUpdateUser(data);
-
-      // navigate('perfil');
-
-      // setTimeout(() => {
-      //   navigate('perfil');
-      // }, 2000);
-
+      navigate('principal' as never)
     } catch (err) {
-      const validationErrors = {};
-      
-      if (err instanceof z.ZodError) {
-        err.errors.forEach(error => {
-          validationErrors[error.path[0]] = error.message;
-        });
-
-        formRef.current.setErrors(validationErrors);
-      }
-
+      addToast({
+        title: 'Ops, ocorreu um erro!',
+        description: err.message,
+        type: 'error'
+      })
+    } finally {
       setLoading(false)
     }
   }
 
   useFocusEffect(
-    useCallback (() => {
-      // const acessibilityOptions = () => {
-      //   firestore()
-      //     .collection('accessibility')
-      //     .get()
-      //     .then((value) => {
-      //       const data = value.docs.map(doc => {
-      //         return {
-      //           ...doc.data(),
-      //         }
-      //       })
-      //       setOptions(data);
-      //     })
-      // }
+    useCallback(() => {
+      const GetAcessibility = () => dispatch(listAcessibility())
 
-      // acessibilityOptions();
+      if (!acessibility) GetAcessibility()
+    }, [acessibility])
+  )
 
-      // formRef.current.setData({
-      //   name: dataAuth.name,
-      //   email: dataAuth.email,
-      //   phoneNumber: dataAuth.phoneNumber,
-      // })  
-    }, [])
-  );
+  useFocusEffect(
+    useCallback(() => {
+      if (user) {
+        setValue('name', user.login)
+        setValue('email', user.email)
+        setValue('document', user.cpf)
+        setValue('phoneNumber', user.telefone)
+      }
+    }, [user])
+  )
 
   return (
     <Container>
       <KeyboardAvoidingView behavior="position" enabled>
         <View
-            style={{
-              position: 'absolute',
-              top: -30,
-              left: width - 120,
-            }}
-          >
-            <ArrowButtom
-              loading={loading}
-              gradient={[ '#A88BEB', '#8241B8' ]}
-              onPress={() => formRef.current.submitForm()}
-            />
-          </View>
+          style={{
+            position: 'absolute',
+            top: -30,
+            left: width - 120,
+          }}
+        >
+          <ArrowButtom
+            loading={loading}
+            gradient={['#A88BEB', '#8241B8']}
+            onPress={handleSubmit(handleUpdateUser)}
+          />
+        </View>
 
-          <Header 
-            title='Alterar meus dados'
-          />
-        <Unform ref={formRef} onSubmit={handleUpdateUser}>
-          <Input
-            name="name"
-            icon="user"
-            placeholder="Nome"
-          />
-          <Input
-            name="email"
-            icon="mail"
-            placeholder="E-mail"
-            keyboardType="email-address"
-            autoCapitalize='none'
-          />
-          <Input
-            name="phoneNumber"
-            icon="user"
-            placeholder="Telefone para contato"
-          />
-          <Select 
-            options={options}
-            // incialValue={dataAuth.accessibility}
-            icon="handshake-o"
-            placeholder="Defina a acessibilidade"
-            header='Selecione sua acessibilidade'
-            label="Usuario"
-            OptionComponent={OptionSelect}
-            onChange={setSelect}
-          />
-          { error && (
-            <ErrorContainer>
-              <Feather 
-                name="alert-triangle"
-                size={24} 
-                color="#DC1637"
-              />
-                <Error> Selecione uma opção </Error>
-            </ErrorContainer>
-          )}
-        </Unform>
+        <Header
+          title='Alterar meus dados'
+        />
+
+        <Input
+          name="name"
+          icon="user"
+          placeholder="Nome"
+          control={control}
+        />
+
+        <Input
+          name="email"
+          icon="mail"
+          placeholder="E-mail"
+          keyboardType="email-address"
+          autoCapitalize='none'
+          control={control}
+        />
+
+        <Input
+          name="document"
+          icon="check-circle"
+          placeholder="Cpf"
+          keyboardType="number-pad"
+          control={control}
+        />
+
+        <Input
+          name="phoneNumber"
+          icon="user"
+          placeholder="Telefone para contato"
+          control={control}
+        />
+
+        <Select
+          name="acessibility"
+          icon="handshake-o"
+          placeholder="Defina a acessibilidade"
+          header='Selecione sua acessibilidade'
+          label="Usuario"
+          OptionComponent={OptionSelect}
+          defaultValue={{
+            id: user.acessibilidades[0].id.toString(),
+            icon: user.acessibilidades[0].icon,
+            value: user.acessibilidades[0].descricao,
+          }}
+          onChange={setValue}
+          control={control}
+          options={selectOptions}
+        />
       </KeyboardAvoidingView>
     </Container>
   )

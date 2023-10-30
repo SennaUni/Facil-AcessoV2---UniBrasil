@@ -2,86 +2,50 @@ import React, { useState, useCallback, useEffect } from 'react';
 
 import { TouchableOpacity, StatusBar } from 'react-native';
 
-import { useAppSelector } from '../../hooks/redux';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+
+import { listAcessibility } from '../../store/slices/acessibilitySlice';
+import { listCommerce } from '../../store/slices/commerceSlice';
+import { listComment } from '../../store/slices/commentSlice';
 
 import { FontAwesome } from '@expo/vector-icons';
 
-import { DataTable as FilterOptions } from '../../components/DataTable/FilterOptions';
+import { DataType, DataTable as FilterOptions } from '../../components/DataTable/FilterOptions';
 import { DataTable } from '../../components/DataTable/Comments';
 
 import { Container, Content, Comments, CommentsText, Icon, CommentsCards } from './styles';
 
 export function Principal() {
-  const [accessOptions, setAccessOptions] = useState([]);
-  const [commerceOptions, setCommerceOptions] = useState([]);
-  const [commentsOptions, setCommentsOptions] = useState([]);
-  const [access, setAccesss] = useState(null);
-  const [commerce, setCommerce] = useState(null);
+  const [selectedAccess, setSelectAccesss] = useState<DataType>()
+  const [selectedCommerce, setSelectCommerce] = useState<DataType>()
 
-  const { navigate } = useNavigation();
+  const { navigate } = useNavigation()
+  const dispatch = useAppDispatch()
 
   const { user } = useAppSelector((state) => state.auth)
+  const { acessibility } = useAppSelector((state) => state.acessibility)
+  const { commerce } = useAppSelector((state) => state.commerce)
+  const { comment } = useAppSelector((state) => state.comment)
 
-  const dados = commentsOptions
-
-  // const dados = (access && commerce)
-  //   ? commentsOptions.filter(item => item.data.access
-  //                    .find(item2 => item2.acessibilidade === access.value))
-  //                    .filter(valor => valor.data.commerce.value === commerce.value )
-  //     : access
-  //     ? commentsOptions.filter(item => item.data.access
-  //                      .find(item2 => item2.acessibilidade === access.value))
-  //       : commerce
-  //         ? commentsOptions.filter(item => item.data.commerce.value === commerce.value)
-  //         : user.accessibility 
-  //           ? commentsOptions.filter(item => item.data.access
-  //                            .find(item2 => item2.acessibilidade === dataAuth.accessibility))
-  //             : commentsOptions;
+  const dados = (selectedCommerce && selectedAccess)
+    ? comment.filter(item => item.estabelecimento.id === selectedCommerce.id).filter(item => item.acessibilidade.some(acessibility => acessibility.id === selectedAccess.id))
+    : selectedCommerce
+      ? comment.filter(item => item.estabelecimento.id === selectedCommerce.id)
+      : selectedAccess
+        ? comment.filter(item => item.acessibilidade.some(acessibility => acessibility.id === selectedAccess.id))
+        : comment
 
   useFocusEffect(
     useCallback(() => {
-      setAccesss(null);
-      setCommerce(null);
+      const GetAcessibility = () => dispatch(listAcessibility())
+      const GetCommerce = () => dispatch(listCommerce())
+      const GetComment = () => dispatch(listComment())
 
-      const AccessOptions = () => {
-        // firestore()
-        //   .collection('accessibility')
-        //   .get()
-        //   .then((value) => {
-        //     const data = value.docs.map(doc => doc.data())
-        //     setAccessOptions(data);
-        //   })
-      }
-
-      const CommercesOptions = () => {
-        // firestore()
-        //   .collection('commerce')
-        //   .get()
-        //   .then((value) => {
-        //     const data = value.docs.map(doc => doc.data())
-        //     setCommerceOptions(data);
-        //   })
-      }
-
-      const Subscriber = () => {
-        // firestore()
-        //   .collection('comments')
-        //   .onSnapshot(querySnapshot => {
-        //     const data = querySnapshot.docs.map(doc => {
-        //       return {
-        //         id: doc.id,
-        //         data: doc.data(),
-        //       }
-        //     })
-        //     setCommentsOptions(data);
-        //   })
-      }
-
-      AccessOptions();
-      CommercesOptions();
-      Subscriber();
-    }, [])
+      if (!acessibility) GetAcessibility()
+      if (!commerce) GetCommerce()
+      if (!comment) GetComment()
+    }, [acessibility, commerce, comment])
   )
 
   useEffect(() => {
@@ -93,40 +57,42 @@ export function Principal() {
       vertical
       showsVerticalScrollIndicator={false}
     >
-      <StatusBar 
-        barStyle="light-content" 
+      <StatusBar
+        barStyle="light-content"
         backgroundColor={'transparent'}
         translucent
       />
 
       <Content colors={['#6C33A3', '#8241B8']}>
         <FilterOptions
-          data={accessOptions}
+          data={acessibility}
           header="Acessibilidades"
-          callBack={setAccesss}
+          callBack={(item: DataType) => setSelectAccesss(item)}
         />
+
         <FilterOptions
-          data={commerceOptions}
+          data={commerce}
           header="Estabelecimento"
-          callBack={setCommerce}
+          callBack={(item: DataType) => setSelectCommerce(item)}
         />
+
         <Comments>
           <CommentsText>Comentarios</CommentsText>
-          {/* {dataAuth.uid &&  */}
-          <TouchableOpacity
-            // onPress={() => navigate('registerComment')}
-            onPress={() => console.log('Cliquei')}
-          >
-            <Icon colors={['#A88BEB', '#8241B8']}>
-              <FontAwesome
-                name='plus'
-                size={30}
-                color='#FFF'
-              />
-            </Icon>
-          </TouchableOpacity>
-          {/* } */}
+          {user &&
+            <TouchableOpacity
+              onPress={() => navigate('registerComment' as never)}
+            >
+              <Icon colors={['#A88BEB', '#8241B8']}>
+                <FontAwesome
+                  name='plus'
+                  size={30}
+                  color='#FFF'
+                />
+              </Icon>
+            </TouchableOpacity>
+          }
         </Comments>
+        
         <CommentsCards>
           <DataTable
             data={dados}
@@ -134,5 +100,5 @@ export function Principal() {
         </CommentsCards>
       </Content>
     </Container>
-  );
+  )
 }

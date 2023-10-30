@@ -16,8 +16,6 @@ import { RegisterComment } from '../screens/RegisterComment'
 import { MyComments } from '../screens/MyComments'
 import { MyFavorites } from '../screens/MyFavorites'
 
-// import { useAuth } from '../hooks/auth';
-
 export type RootDrawerNavigator = {
     forgotPassword: undefined
     register: undefined
@@ -34,8 +32,8 @@ export type RootDrawerNavigator = {
 const { Screen, Navigator } = createDrawerNavigator<RootDrawerNavigator>()
 
 export function DrawerRoutes() {
-
-    const { user } = useAppSelector((state) => state.auth)
+    // const user = useAppSelector((state) => state.auth && state.auth.user)
+  const { user } = useAppSelector((state) => state.auth)
 
     return (
         <Navigator

@@ -2,7 +2,9 @@ import React from 'react';
 
 import { View } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
+import { useAppSelector, useAppDispatch } from '../../hooks/redux';
+
+import { logoff } from '../../store/slices/authSlice'
 
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer'
 
@@ -12,12 +14,11 @@ import { useToast } from '../../hooks/toast';
 
 import { Container, Header, HeaderImage, HeaderText, DrawerOptions, Footer, FooterButtons, FooterText } from './styles';
 
-export function CustomDrawer( props ) {
+export function CustomDrawer( props: any ) {
+  const user = useAppSelector((state) => state.auth && state.auth.user)
 
-  // const { dataAuth, signOut } = useAuth();
-  const { navigate } = useNavigation();
-  const { addToast } = useToast();
-  
+  const { addToast } = useToast()
+  const dispatch = useAppDispatch()
 
   return (
      <Container colors={[ '#8241B8', '#6C33A3' ]}>
@@ -30,8 +31,7 @@ export function CustomDrawer( props ) {
               
             />
             <HeaderText>
-              {/* { dataAuth.name ? 'Olá, ' + dataAuth.name  : 'Bem vindo, Visitante'} */}
-              { 'Bem vindo, Visitante'}
+              { user ? 'Olá, ' + user.login  : 'Bem vindo, Visitante'}
             </HeaderText>
           </View>
         </Header>
@@ -53,16 +53,13 @@ export function CustomDrawer( props ) {
         </FooterButtons>
         <FooterButtons
           onPress={() => {
-            // signOut();
-            
-            const success = {
+            // dispatch(logoff())
+
+            addToast({
               type: 'success', 
               title: 'LogOut com sucesso', 
               description: 'Até a próxima',
-            }
-      
-            // addToast(success); 
-            // navigate('principal');
+            })
           }}
         >
           <MaterialIcons 

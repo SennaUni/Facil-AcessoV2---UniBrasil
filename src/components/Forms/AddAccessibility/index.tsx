@@ -19,116 +19,119 @@ import { Header } from '../../Header';
 
 import { useToast } from '../../../hooks/toast';
 
+import { useFormContext } from 'react-hook-form'
+
 import { Container, ErrorContainer, Error } from './styles';
 
 const { width } = Dimensions.get('window');
 
-export function Form({ callBack, onSubmit, getAccess, formRef }) {
-  const [loading, setLoading] = useState(false);
-  const [accessibilities, setAccessibilities] = useState([]);
-  const [options, setOptions] = useState([]);
-  const [error, setError] = useState(false);
-  const [select, setSelect] = useState('');
+export type FormParam = {
+  callBack: () => void
+  loading: boolean
+}
 
+export function Form({ callBack, loading }: FormParam) {
   const { addToast } = useToast();
   const { navigate } = useNavigation();
 
-  function onSubmitForm() {
-    setLoading(true);
+  const { control, getValues, setError, handleSubmit } = useFormContext()
 
-    if (accessibilities.length === 0) {
-      addToast({
-        type: 'error', 
-        title: 'Ocorreu um erro', 
-        description: 'Nenhuma acessibilidade cadastrada',
-      })
+  // function onSubmitForm() {
+  //   setLoading(true);
 
-      setLoading(false)
-      return
-    } 
+  //   if (accessibilities.length === 0) {
+  //     addToast({
+  //       type: 'error', 
+  //       title: 'Ocorreu um erro', 
+  //       description: 'Nenhuma acessibilidade cadastrada',
+  //     })
 
-    getAccess(accessibilities);
+  //     setLoading(false)
+  //     return
+  //   } 
 
-    // setTimeout(() => {
-    //   onSubmit();
-    //   setLoading(false);
-    //   navigate('principal');
-    // }, 1000);
-  }
+  //   getAccess(accessibilities);
 
-  async function handleAddAccess() {
-    try {
-      const data = formRef.current.getData();
+  //   // setTimeout(() => {
+  //   //   onSubmit();
+  //   //   setLoading(false);
+  //   //   navigate('principal');
+  //   // }, 1000);
+  // }
 
-      formRef.current.setErrors({});
+  // async function handleAddAccess() {
+  //   try {
+  //     const data = formRef.current.getData();
 
-      if (!select) {
-        setError(true);
-        await schema.parseAsync(data)
-        return;
-      } 
+  //     formRef.current.setErrors({});
+
+  //     if (!select) {
+  //       setError(true);
+  //       await schema.parseAsync(data)
+  //       return;
+  //     } 
         
-      setError(false);
+  //     setError(false);
 
-      await schema.parseAsync(data)
+  //     await schema.parseAsync(data)
 
-      // const access ={
-      //   descricao: data.accessibility,
-      //   acessibilidade: select.value,
-      //   icon: select.icon,
-      // };
+  //     // const access ={
+  //     //   descricao: data.accessibility,
+  //     //   acessibilidade: select.value,
+  //     //   icon: select.icon,
+  //     // };
 
-      setAccessibilities([
-        ...accessibilities,
-        // access,
-      ]);  
+  //     setAccessibilities([
+  //       ...accessibilities,
+  //       // access,
+  //     ]);  
       
-      addToast({
-        type: 'success', 
-        title: 'Acessibilidade cadastrada', 
-        description: 'Acessibilidade cadastrada com sucesso',
-      })
+  //     addToast({
+  //       type: 'success', 
+  //       title: 'Acessibilidade cadastrada', 
+  //       description: 'Acessibilidade cadastrada com sucesso',
+  //     })
 
-    } catch (err) {
-      const validationErrors = {};
+  //   } catch (err) {
+  //     const validationErrors = {};
       
-      if (err instanceof z.ZodError) {
-        err.errors.forEach(error => {
-          validationErrors[error.path[0]] = error.message;
-        });
+  //     if (err instanceof z.ZodError) {
+  //       err.errors.forEach(error => {
+  //         validationErrors[error.path[0]] = error.message;
+  //       });
 
-        formRef.current.setErrors(validationErrors);
-      }
-    }
-  }
+  //       formRef.current.setErrors(validationErrors);
+  //     }
+  //   }
+  // }
 
-  useEffect(() => {
-    setError(false);
+  // useEffect(() => {
+  //   setError(false);
 
-      formRef.current.setErrors({});
+  //     formRef.current.setErrors({});
       
-      formRef.current.setData({
-        accessibility: '',
-      })  
-  }, [accessibilities])
+  //     formRef.current.setData({
+  //       accessibility: '',
+  //     })  
+  // }, [accessibilities])
 
-  useFocusEffect(
-    useCallback (() => {
-      setError(false);
+  // useFocusEffect(
+  //   useCallback (() => {
+  //     setError(false);
 
-      // const AccessOptions = () => {
-      //   firestore()
-      //     .collection('accessibility')
-      //     .get()
-      //     .then((value) => {
-      //       const data = value.docs.map(doc => doc.data())
-      //       setOptions(data);
-      //     })
-      // }
+  //     // const AccessOptions = () => {
+  //     //   firestore()
+  //     //     .collection('accessibility')
+  //     //     .get()
+  //     //     .then((value) => {
+  //     //       const data = value.docs.map(doc => doc.data())
+  //     //       setOptions(data);
+  //     //     })
+  //     // }
   
-      // AccessOptions();
-    }, [])
-  );
+  //     // AccessOptions();
+  //   }, [])
+  // );
 
   return (
     <Container>
@@ -157,7 +160,8 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
         <ArrowButtom
           loading={loading}
           gradient={[ '#A88BEB', '#8241B8' ]}
-          onPress={() => onSubmitForm()}
+          // onPress={handleSubmit(callBack)}
+          onPress={() => console.log('Teria q voltar ne')}
         />
       </View>
 
@@ -165,10 +169,10 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
         title='Acessibilidades presentes'
       />
 
-      { accessibilities && <DataTable data={accessibilities} /> }
+      {/* { accessibilities && <DataTable data={accessibilities} /> } */}
 
       <KeyboardAvoidingView behavior="position" enabled>
-          <Select 
+          {/* <Select 
             options={options}
             icon="universal-access"
             placeholder="Defina a acessibilidade"
@@ -176,17 +180,7 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
             label="Usuario"
             OptionComponent={OptionSelect}
             onChange={setSelect}
-          />
-          { error && (
-            <ErrorContainer>
-              <Feather 
-                name="alert-triangle"
-                size={24} 
-                color="#DC1637"
-              />
-                <Error> Selecione uma opção </Error>
-            </ErrorContainer>
-          )}
+          /> */}
 
           <Input
             name="accessibility"
@@ -194,11 +188,12 @@ export function Form({ callBack, onSubmit, getAccess, formRef }) {
             placeholder="Descreva a accessibilidade"
             multiline
             numberOfLines={3}
+            control={control}
           />
 
           <Buttom
             title="Cadastrar"
-            onPress={() => handleAddAccess()}
+            onPress={handleSubmit(callBack)}
           />
 
       </KeyboardAvoidingView>

@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react';
 
 import { View, Dimensions } from 'react-native';
 
+import { listAcessibility } from '../../../store/slices/acessibilitySlice';
+
 import { useFocusEffect } from '@react-navigation/native';
 
 import { createUserApiRequest } from '../../../api/authRequests';
@@ -11,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { schema, FormData } from './zodSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 
 import { Input } from '../../Basics/Input';
 import { PasswordInput } from '../../Basics/PasswordInput';
@@ -33,6 +36,19 @@ export function Form() {
 
   const { addToast } = useToast()
   const { navigate } = useNavigation()
+  const dispatch = useAppDispatch()
+
+  // const { acessibility } = useAppSelector((state) => state.acessibility)
+
+  // const selectOptions = acessibility
+  //   ? acessibility.map(value => ({
+  //     id: value.id,
+  //     icon: value.icon,
+  //     value: value.descricao,
+  //   }))
+  //   : []
+
+    const selectOptions = []
 
   async function handleUserRegister(data: FormData) {
     setLoading(true)
@@ -44,7 +60,8 @@ export function Form() {
         telefone: data.phoneNumber,
         cpf: data.document,
         acessibilidade: [data.acessibility.id],
-        email: data.email
+        email: data.email,
+        dataNascimento: '',
       })
 
       addToast({
@@ -70,6 +87,14 @@ export function Form() {
       reset()
     }, [reset])
   )
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const GetAcessibility = () => dispatch(listAcessibility())
+
+  //     if (!acessibility) GetAcessibility()
+  //   }, [acessibility])
+  // )
 
   return (
     <Container>
@@ -132,12 +157,7 @@ export function Form() {
         OptionComponent={OptionSelect}
         onChange={setValue}
         control={control}
-        options={[
-          { id: 1, icon: 'phone', value: 'teste' },
-          { id: 2, icon: 'phone', value: 'teste' },
-          { id: 3, icon: 'phone', value: 'teste' },
-          { id: 4, icon: 'phone', value: 'teste' },
-        ]}
+        options={selectOptions}
       />
 
       <PasswordInput

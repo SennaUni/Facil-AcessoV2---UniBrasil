@@ -9,6 +9,8 @@ import { Feather } from '@expo/vector-icons';
 import { z } from 'zod';
 import { schema, FormData } from './zodSchema';
 
+import { useFormContext } from 'react-hook-form'
+
 import { Input } from '../../Basics/Input';
 import { ArrowButtom } from '../../Basics/ArrowButtom';
 import { Header } from '../../Header';
@@ -19,7 +21,12 @@ import { Container, ErrorContainer, Error } from './styles';
 
 const { width } = Dimensions.get('window');
 
-export function Form({ callBack, getSelectRate, getSelectCommerce, formRef, loading }) {
+export type FormParam = {
+  callBack: () => void
+  loading: boolean
+}
+
+export function Form({ callBack, loading }: FormParam) {
   const [optionsRate, setOptionsRate] = useState([]);
   const [selectRate, setSelectRate] = useState('');
   const [errorRate, setErrorRate] = useState(false);
@@ -28,60 +35,68 @@ export function Form({ callBack, getSelectRate, getSelectCommerce, formRef, load
   const [selectCommerce, setSelectCommerce] = useState('');
   const [errorCommerce, setErrorCommerce] = useState(false);
 
+  const { control, getValues, setError, handleSubmit } = useFormContext()
+
   async function handleChangeForm() {
-    try {
-      setErrorRate(false);
-      setErrorCommerce(false);
+    console.log('Entrei')
 
-      const data = formRef.current.getData();
+    const data = getValues()
 
-      formRef.current.setErrors({});
+    console.log(data)
+    
+    // try {
+    //   setErrorRate(false);
+    //   setErrorCommerce(false);
 
-      if (!selectRate && !selectCommerce) {
-        setErrorRate(true)
-        setErrorCommerce(true);
-        await schema.parseAsync(data)
-        return
-      }
+    //   const data = formRef.current.getData();
 
-      if (!selectRate) {
-        setErrorRate(true)
-        await schema.parseAsync(data)
-        return
-      }
+    //   formRef.current.setErrors({});
 
-      if (!selectCommerce) {
-        setErrorCommerce(true)
-        await schema.parseAsync(data)
-        return
-      }
+    //   if (!selectRate && !selectCommerce) {
+    //     setErrorRate(true)
+    //     setErrorCommerce(true);
+    //     await schema.parseAsync(data)
+    //     return
+    //   }
 
-      setErrorRate(false);
-      setErrorCommerce(false);
+    //   if (!selectRate) {
+    //     setErrorRate(true)
+    //     await schema.parseAsync(data)
+    //     return
+    //   }
 
-      await schema.parseAsync(data)
+    //   if (!selectCommerce) {
+    //     setErrorCommerce(true)
+    //     await schema.parseAsync(data)
+    //     return
+    //   }
 
-      callBack();
-      getSelectRate(selectRate);
-      getSelectCommerce(selectCommerce);
+    //   setErrorRate(false);
+    //   setErrorCommerce(false);
 
-    } catch (err) {
-      const validationErrors = {};
+    //   await schema.parseAsync(data)
 
-      if (err instanceof z.ZodError) {
-        err.errors.forEach(error => {
-          validationErrors[error.path[0]] = error.message;
-        });
+    //   callBack();
+    //   getSelectRate(selectRate);
+    //   getSelectCommerce(selectCommerce);
 
-        formRef.current.setErrors(validationErrors);
-      }
-    }
+    // } catch (err) {
+    //   const validationErrors = {};
+
+    //   if (err instanceof z.ZodError) {
+    //     err.errors.forEach(error => {
+    //       validationErrors[error.path[0]] = error.message;
+    //     });
+
+    //     formRef.current.setErrors(validationErrors);
+    //   }
+    // }
   }
 
   useFocusEffect(
     useCallback(() => {
-      setErrorRate(false);
-      setErrorCommerce(false);
+      // setErrorRate(false);
+      // setErrorCommerce(false);
 
       // const rateOptions = () => {
       //   firestore()
@@ -120,7 +135,7 @@ export function Form({ callBack, getSelectRate, getSelectCommerce, formRef, load
         <ArrowButtom
           loading={loading}
           gradient={['#A88BEB', '#8241B8']}
-          onPress={() => handleChangeForm()}
+          onPress={handleSubmit(callBack)}
         />
       </View>
       <Header
@@ -131,57 +146,44 @@ export function Form({ callBack, getSelectRate, getSelectCommerce, formRef, load
           name="name"
           icon="user"
           placeholder="Nome estabalecimento"
+          control={control}
         />
         <Input
           name="address"
           icon="map-pin"
           placeholder="Endereço"
+          control={control}
         />
 
-        <Select
+        {/* <Select
           options={optionsRate}
+          name='satisfation'
           icon="star"
           placeholder="Defina sua satisfação"
           header='Selecione sua satisfação'
           OptionComponent={OptionSelect}
           onChange={setSelectRate}
+          control={control}
         />
-        {errorRate && (
-          <ErrorContainer>
-            <Feather
-              name="alert-triangle"
-              size={24}
-              color="#DC1637"
-            />
-            <Error> Selecione uma opção </Error>
-          </ErrorContainer>
-        )}
 
         <Select
+          name='catrgory'
           options={optionsCommerce}
           icon="shopping-bag"
           placeholder="Defina sua categoria"
           header='Selecione sua categoria'
           OptionComponent={OptionSelect}
           onChange={setSelectCommerce}
-        />
-        {errorCommerce && (
-          <ErrorContainer>
-            <Feather
-              name="alert-triangle"
-              size={24}
-              color="#DC1637"
-            />
-            <Error> Selecione uma opção </Error>
-          </ErrorContainer>
-        )}
+          control={control}
+        /> */}
 
         <Input
           name="comment"
           icon="message-circle"
           placeholder="Insira um comentário"
-          multiline
           numberOfLines={4}
+          control={control}
+          multiline
         />
       </KeyboardAvoidingView>
     </Container>

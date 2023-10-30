@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, Text, View } from 'react-native';
+import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 
 import { Header } from '../../components/Header';
 import { MyProfile } from '../../components/MyProfile';

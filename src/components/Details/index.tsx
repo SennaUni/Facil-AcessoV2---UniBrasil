@@ -11,8 +11,13 @@ import { DataTable } from '../DataTable/Accessibilities';
 import { Container, ButtonDetails, DeatilsText, ModalContent, ModalHeader, ModalButtons, ModalDeatils, Icon, Title, SubTitle, Text, CommentText, RowView } from './styles';
 
 export function Deatils({ data }) {
+  const [openModal, setOpenModal] = useState(false)
 
-  const [openModal, setOpenModal] = useState(false);
+  const rates = [
+    { icon: 'meh-o', value: 'Recomendo' },
+    { icon: 'smile-o', value: 'Super recomendo' },
+    { icon: 'frown-o', value: 'Não recomendo' },
+  ]
 
   useFocusEffect(
     useCallback (() => {
@@ -79,7 +84,8 @@ export function Deatils({ data }) {
             >
               <Icon colors={[ '#A88BEB', '#8241B8' ]}>
                 <FontAwesome
-                  name={data.rate.icon}
+                  name={rates[2].icon as any}
+                  // name={rates[data.nivelSatisfacao] as any}
                   size={40}
                   color='#FFF'
                 />
@@ -94,14 +100,14 @@ export function Deatils({ data }) {
             >
               <Icon colors={[ '#A88BEB', '#8241B8' ]}>
                 <FontAwesome
-                  name={data.commerce.icon}
+                  name={data.estabelecimento.icon}
                   size={34}
                   color='#FFF'
                 />
               </Icon>
             </View>
               <Title>
-                {data.name}
+                {data.nomeEstabelecimento}
               </Title>
               <RowView>
                 <FontAwesome
@@ -109,19 +115,19 @@ export function Deatils({ data }) {
                   size={30}
                   color='#8241B8'
                 />
-                <Text>{data.address}</Text>
+                <Text>{data.rua} nº {data.numero}, {data.bairro} {data.estado} - {data.cep}</Text>
               </RowView>
               <SubTitle>
                 Comentário
               </SubTitle>
               <CommentText>
-                {data.comment}
+                {data.comentario}
               </CommentText>
               <SubTitle>
                   Acessibilidades Presentes
               </SubTitle>
               <DataTable 
-                data={data.access} 
+                data={data.acessibilidade} 
               />
             </ModalDeatils>
           </ModalContent>

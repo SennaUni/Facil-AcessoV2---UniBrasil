@@ -1,13 +1,15 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { KeyboardAvoidingView, View, Dimensions } from 'react-native';
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-import { Form as Unform } from '@unform/mobile';
+import { updatePasswordApiRequest } from '../../../api/authRequests';
 
-import { z } from 'zod';
 import { schema, FormData } from './zodSchema';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAppSelector } from '../../../hooks/redux';
 
 import { PasswordInput } from '../../Basics/PasswordInput';
 import { ArrowButtom } from '../../Basics/ArrowButtom';
@@ -19,96 +21,55 @@ import { Container } from './styles';
 const { width } = Dimensions.get('window');
 
 export function Form() {
-  const formRef = useRef(null)
+  const [loading, setLoading] = useState(false)
 
-  const [loading, setLoading] = useState(false);
+  const { user } = useAppSelector((state) => state.auth)
 
-  const { addToast } = useToast();
-  const { navigate } = useNavigation();
-  // const { dataAuth, updateValues } = useAuth();
+  const { handleSubmit, control, reset } = useForm<FormData>({
+    resolver: zodResolver(schema)
+  })
 
-  // async function handleFirebaseUpdatePassword({ oldPassword, newPassword }) {
-  //   auth()
-  //     .signInWithEmailAndPassword(dataAuth.email, oldPassword)
-  //     .then(() => {
-  //       const user = auth().currentUser;
-
-  //       user.updatePassword(newPassword);
-
-  //       firestore()
-  //     .collection('users')
-  //     .doc(dataAuth.uid)
-  //     .update({
-  //       password: newPassword
-  //     })
-
-  //       updateValues({
-  //         password: newPassword,
-  //       })
-          
-  //       const success = {
-  //         type: 'success', 
-  //         title: 'Senha atualizada com sucesso', 
-  //         description: 'Tome cuidado na proxima vez',
-  //       }
-
-  //       addToast(success);
-
-  //       setTimeout(() => {
-  //         navigate('perfil');
-  //       }, 2000);
-  //     })
-  //     .catch((err) => { console.log(err)
-  //       const error = {
-  //         type: 'error', 
-  //         title: 'Ocorreu um erro', 
-  //         description: 'A senha informada esta inválida',
-  //       }
-
-  //       addToast(error);
-  //     })
-  //     .finally(() => setLoading(false));
-  // }
+  const { addToast } = useToast()
+  const { navigate } = useNavigation()
 
   async function handleUpdatePassword(data: FormData) {
-    setLoading(true);
+    setLoading(true)
 
     try {
-      formRef.current.setErrors({})
+      await updatePasswordApiRequest({
+        id: user.id,
+        senhaAtual: data.oldPassword,
+        senhaNova: data.newPassword,
+      })
 
-      await schema.parseAsync(data)
+      addToast({
+        title: 'Operação realizada com sucesso!',
+        description: 'Senha editada',
+        type: 'success'
+      })
 
-      // await handleFirebaseUpdatePassword(data)
-
+      navigate('principal' as never)
     } catch (err) {
-      const validationErrors = {};
-      
-      if (err instanceof z.ZodError) {
-        err.errors.forEach(error => {
-          validationErrors[error.path[0]] = error.message;
-        });
-
-        formRef.current.setErrors(validationErrors);
-      }
-
+      addToast({
+        title: 'Ops, ocorreu um erro!',
+        description: err.message,
+        type: 'error'
+      })
+    } finally {
       setLoading(false)
-    } 
+    }
   }
 
   useFocusEffect(
-    useCallback (() => {
-      formRef.current.setData({
-        oldPassword: '',
-        newPassword: '',
-        newPasswordConfirm: '',
-      })
+    useCallback(() => {
+      reset()
     }, [])
-  );
+  )
 
   return (
     <Container>
       <KeyboardAvoidingView behavior="position" enabled>
-      <View
+        <View
           style={{
             position: 'absolute',
             top: -30,
@@ -117,31 +78,34 @@ export function Form() {
         >
           <ArrowButtom
             loading={loading}
-            gradient={[ '#A88BEB', '#8241B8' ]}
-            onPress={() => formRef.current.submitForm()}
+            gradient={['#A88BEB', '#8241B8']}
+            onPress={handleSubmit(handleUpdatePassword)}
           />
         </View>
 
-        <Header 
+        <Header
           title='Alterar senha'
         />
-        <Unform ref={formRef} onSubmit={handleUpdatePassword}>
-          <PasswordInput
-            name="oldPassword"
-            icon="lock"
-            placeholder="Senha atual"
-          />
-          <PasswordInput
-            name="newPassword"
-            icon="lock"
-            placeholder="Nova senha"
-          />
-          <PasswordInput
-            name="newPasswordConfirm"
-            icon="lock"
-            placeholder="Confirmar nova senha"
-          />
-        </Unform>
+        <PasswordInput
+          name="oldPassword"
+          icon="lock"
+          placeholder="Senha atual"
+          control={control}
+        />
+
+        <PasswordInput
+          name="newPassword"
+          icon="lock"
+          placeholder="Nova senha"
+          control={control}
+        />
+
+        <PasswordInput
+          name="newPasswordConfirm"
+          icon="lock"
+          placeholder="Confirmar nova senha"
+          control={control}
+        />
       </KeyboardAvoidingView>
     </Container>
   )

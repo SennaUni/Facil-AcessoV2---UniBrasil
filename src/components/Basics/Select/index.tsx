@@ -25,7 +25,7 @@ export type SelectParam = {
   defaultValue?: SelectedValueType
 }
 
-type SelectedValueType = {
+export type SelectedValueType = {
   id: string
   value: string
   icon: string
@@ -38,7 +38,8 @@ export function Select({ icon, control, name, defaultValue, options, placeholder
 
   useFocusEffect(
     useCallback(() => {
-      setSelectedValue(undefined)
+      if (!defaultValue)
+        setSelectedValue(undefined)
     }, [])
   )
 

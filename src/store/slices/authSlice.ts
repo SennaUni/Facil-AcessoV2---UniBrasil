@@ -1,13 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import { LoginApiParams, loginApiRequest } from '../../api/authRequests';
-import { CreateUserParams, createUserApiRequest } from '../../api/authRequests';
-
-export interface Root {
-  usuario: Usuario
-  token: string
-  tipoAutenticacao: string
-}
+import { UpdateProfileParams, updateProfileApiRequest } from '../../api/authRequests';
 
 export interface Usuario {
   id: number
@@ -26,6 +20,7 @@ export interface Usuario {
 export interface Acessibilidade {
   id: number
   descricao: string
+  icon: string
   dataCriacao: string
   dataRemocao: any
   dataEdicao: any
@@ -34,6 +29,8 @@ export interface Acessibilidade {
 
 export interface AuthState {
   user: Usuario | null;
+  token: string | null;
+
   loading: 'idle' | 'pending';
   error: any | boolean;
   sucess: any | boolean;
@@ -41,6 +38,8 @@ export interface AuthState {
 
 const initialState: AuthState = {
   user: null,
+  token: null,
+
   loading: 'idle',
   error: false,
   sucess: false
@@ -55,10 +54,24 @@ export const loginAsync = createAsyncThunk('auth/login', async (data: LoginApiPa
   }
 })
 
+export const updateProfileAsync = createAsyncThunk('auth/updateProfile', async (data: UpdateProfileParams, { rejectWithValue }) => {
+  try {
+    const response = await updateProfileApiRequest(data)
+    return response;
+  } catch (error) {
+    return rejectWithValue(error.message)
+  }
+})
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    logoff: (state) => {
+      state.user = null;
+      state.token = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loginAsync.pending, (state) => {
@@ -67,8 +80,9 @@ const authSlice = createSlice({
         state.sucess = false;
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
+        state.user = action.payload.usuario;
+        state.token = action.payload.token;
         state.loading = 'idle';
-        state.user = action.payload;
         state.sucess = true;
       })
       .addCase(loginAsync.rejected, (state, action) => {
@@ -76,8 +90,13 @@ const authSlice = createSlice({
         state.error = action.payload ? action.payload : 'Erro desconhecido';
         state.sucess = false;
       })
+
+      .addCase(updateProfileAsync.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
   }
 })
 
 export default authSlice.reducer
 
+export const { logoff } = authSlice.actions

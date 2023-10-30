@@ -2,96 +2,67 @@ import React, { useState, useCallback } from 'react'
 
 import { useFocusEffect } from '@react-navigation/native';
 
-import { DataTable as FilterOptions } from '../../components/DataTable/FilterOptions';
+import { DataType, DataTable as FilterOptions } from '../../components/DataTable/FilterOptions';
 import { DataTable } from '../../components/DataTable/Comments';
 
 import { Container, Content, Comments, CommentsText, CommentsCards } from './styles';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { listAcessibility } from '../../store/slices/acessibilitySlice';
+import { listCommerce } from '../../store/slices/commerceSlice';
+import { listMyFavorite } from '../../store/slices/myFavoriteSlice';
 
 export function MyFavorites() {
-  const [loading, setLoading] = useState(false);
-  const [accessOptions, setAccessOptions] = useState([]);
-  const [commerceOptions, setCommerceOptions] = useState([]);
-  const [commentsOptions, setCommentsOptions] = useState([]);
-  const [access, setAccesss] = useState(null);
-  const [commerce, setCommerce] = useState(null);
+  const [selectedAccess, setSelectAccesss] = useState<DataType>()
+  const [selectedCommerce, setSelectCommerce] = useState<DataType>()
 
-  const dados = commentsOptions
-  // const dados = (access && commerce)
-  //   ? commentsOptions.filter(item => item.data.access
-  //                    .find(item2 => item2.acessibilidade === access.value))
-  //                    .filter(valor => valor.data.commerce.value === commerce.value )
-  //     : access
-  //     ? commentsOptions.filter(item => item.data.access
-  //                      .find(item2 => item2.acessibilidade === access.value))
-  //       : commerce
-  //         ? commentsOptions.filter(item => item.data.commerce.value === commerce.value)
-  //         : commentsOptions;
+  const dispatch = useAppDispatch()
 
-  useFocusEffect( 
-    useCallback (() => {
-      setAccesss(null);
-      setCommerce(null);
+  const { user } = useAppSelector((state) => state.auth)
+  const { acessibility } = useAppSelector((state) => state.acessibility)
+  const { commerce } = useAppSelector((state) => state.commerce)
+  const { comment } = useAppSelector((state) => state.myFavorite)
 
-      const AccessOptions = () => {
-        // firestore()
-        //   .collection('accessibility')
-        //   .get()
-        //   .then((value) => {
-        //     const data = value.docs.map(doc => doc.data())
-        //     setAccessOptions(data);
-        //   })
-      }
+  const dados = (selectedCommerce && selectedAccess)
+    ? comment.filter(item => item.estabelecimento.id === selectedCommerce.id).filter(item => item.acessibilidade.some(acessibility => acessibility.id === selectedAccess.id))
+    : selectedCommerce
+      ? comment.filter(item => item.estabelecimento.id === selectedCommerce.id)
+      : selectedAccess
+        ? comment.filter(item => item.acessibilidade.some(acessibility => acessibility.id === selectedAccess.id))
+        : comment
 
-      const CommercesOptions = () => {
-        // firestore()
-        //   .collection('commerce')
-        //   .get()
-        //   .then((value) => {
-        //     const data = value.docs.map(doc => doc.data())
-        //     setCommerceOptions(data);
-        //   })
-      }
+  useFocusEffect(
+    useCallback(() => {
+      const GetAcessibility = () => dispatch(listAcessibility())
+      const GetCommerce = () => dispatch(listCommerce())
+      const GetMyComment = () => dispatch(listMyFavorite(user.id))
 
-      const Subscriber = () => {
-        // firestore()
-        //   .collection('comments')
-        //   .where('liked_by', 'array-contains', dataAuth.uid)
-        //   .onSnapshot(querySnapshot => {
-        //     const data = querySnapshot.docs.map(doc => {
-        //       return {
-        //         id: doc.id,
-        //         data: doc.data(),
-        //       }
-        //     })
-        //     setCommentsOptions(data);
-        //   })
-      }
-
-      AccessOptions();
-      CommercesOptions();
-      Subscriber();
-    }, [])
-  );
-
+      if (!acessibility) GetAcessibility()
+      if (!commerce) GetCommerce()
+      if (!comment) GetMyComment()
+    }, [acessibility, commerce, comment, user])
+  )
   return (
     <Container
       vertical
       showsVerticalScrollIndicator={false}
     >
-      <Content colors={[ '#6C33A3', '#8241B8' ]}>
-        <FilterOptions 
-          data={accessOptions}
+      <Content colors={['#6C33A3', '#8241B8']}>
+        <FilterOptions
+          data={acessibility}
           header="Acessibilidades"
-          callBack={setAccesss}
+          callBack={(item: DataType) => setSelectAccesss(item)}
         />
-        <FilterOptions 
-          data={commerceOptions}
+
+        <FilterOptions
+          data={commerce}
           header="Estabelecimento"
-          callBack={setCommerce}
+          callBack={(item: DataType) => setSelectCommerce(item)}
         />
+
         <Comments>
           <CommentsText>Comentarios Favoritos</CommentsText>
         </Comments>
+
         <CommentsCards>
           <DataTable
             data={dados}
@@ -99,5 +70,5 @@ export function MyFavorites() {
         </CommentsCards>
       </Content>
     </Container>
-  );
+  )
 }

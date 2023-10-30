@@ -6,8 +6,11 @@ import { Card } from '../../Card';
 
 import { Container, EmpytComment } from './styles';
 
-export function DataTable({ data }) {
+export type DataTableParams = {
+  data: any
+}
 
+export function DataTable({ data }: DataTableParams) {
   function Empty() {
     return (
       <EmpytComment>

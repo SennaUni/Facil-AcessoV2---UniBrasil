@@ -6,15 +6,17 @@ import { useNavigation } from '@react-navigation/native';
 
 import { FontAwesome } from '@expo/vector-icons';
 
-// import { useAuth } from '../../hooks/auth';
+import { useAppSelector } from '../../hooks/redux';
 
 import { Container, Image, Content, Button, Gradient, Title, Label, Value } from './styles';
+
+import { DataTable } from '../DataTable/Accessibilities';
 
 const { width } = Dimensions.get('window');
 
 export function MyProfile() {
+  const { user } = useAppSelector((state) => state.auth)
 
-  // const { dataAuth } = useAuth();
   const { navigate } = useNavigation();
 
   return (
@@ -39,7 +41,7 @@ export function MyProfile() {
         }}
       >
         <Button
-        // onPress={() => navigate('updateUser')}
+          onPress={() => navigate('updateUser' as never)}
         >
           <Gradient
             colors={['#A88BEB', '#8241B8']}
@@ -61,7 +63,7 @@ export function MyProfile() {
         }}
       >
         <Button
-        // onPress={() => navigate('updatePassword')}
+          onPress={() => navigate('updatePassword' as never)}
         >
           <Gradient
             colors={['#A88BEB', '#8241B8']}
@@ -77,36 +79,27 @@ export function MyProfile() {
 
       <Content>
         <Title>
-          {/* {dataAuth.name} */}
-          Corrigir
+          {user.login}
         </Title>
         <Label>
           Email
         </Label>
         <Value>
-          Corrigir
-          {/* {dataAuth.email} */}
+          {user.email}
         </Value>
         <Label>
           Contato
         </Label>
         <Value>
-          {/* {dataAuth.phoneNumber} */}
-          Corrigir
+          {user.telefone}
         </Value>
         <Label>
           Acessibilidade
         </Label>
         <Value>
-          {/* {dataAuth.accessibility} */}
-          Corrigir
-        </Value>
-        <Label>
-          Senha
-        </Label>
-        <Value>
-          {/* {dataAuth.password} */}
-          Corrigir
+          <DataTable
+            data={user.acessibilidades}
+          />
         </Value>
       </Content>
     </Container>

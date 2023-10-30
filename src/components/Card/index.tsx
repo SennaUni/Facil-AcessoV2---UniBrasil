@@ -4,12 +4,21 @@ import { View } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
 
+import { useAppSelector } from '../../hooks/redux';
+
 import { Deatils } from '../Details';
 import { useToast } from '../../hooks/toast';
 
 import { Container, Icon, Header, Content, Address, AddressText, Buttons, IconButton } from './styles';
 
 export function Card({item}) {
+  const rates = [
+    { icon: 'meh-o', value: 'Recomendo' },
+    { icon: 'smile-o', value: 'Super recomendo' },
+    { icon: 'frown-o', value: 'Não recomendo' },
+  ]
+
+  const { user } = useAppSelector((state) => state.auth)
 
   const { addToast } = useToast();
 
@@ -78,13 +87,13 @@ export function Card({item}) {
       >
         <Icon colors={[ '#A88BEB', '#8241B8' ]}>
           <FontAwesome
-            name={item.data.rate.icon}
+            name={rates[1].icon as any}
             size={30}
             color='#FFF'
           />
         </Icon>
       </View>
-      <Header>{item.data.name} </Header>
+      <Header>{item.nomeEstabelecimento} </Header>
       <Content>
         <Address>
           <FontAwesome 
@@ -93,7 +102,7 @@ export function Card({item}) {
             color="#8241B8"
           />
           <AddressText>
-            {item.data.address}
+            {item.bairro} - {item.estado}
           </AddressText>
         </Address>
 
@@ -102,7 +111,6 @@ export function Card({item}) {
             onPress={addFavoritos}
           >
             <FontAwesome 
-              // name={'heart-o' || 'heart'} 
               name={isFav ? 'heart' : 'heart-o'} 
               size={24} 
               color="#8241B8"
@@ -110,8 +118,9 @@ export function Card({item}) {
           </IconButton>
         </Buttons>
       </Content>
+
       <Deatils 
-        data={item.data}
+        data={item}
       />
     </Container>
   )

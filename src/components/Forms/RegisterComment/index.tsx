@@ -2,9 +2,11 @@ import React, { useState, useRef, useCallback } from 'react';
 
 import { KeyboardAvoidingView, View } from 'react-native';
 
-import { useFocusEffect } from '@react-navigation/native';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod'
 
-import { Form as Unform } from '@unform/mobile';
+import { FormData as firstFormData, schema as firstSchema } from '../AddComment/zodSchema'
+import { FormData as secondFormData, schema as secondSchema } from '../AddAccessibility/zodSchema'
 
 import { Form as FormComment } from '../AddComment';
 import { Form as FormAccessibility } from '../AddAccessibility';
@@ -12,15 +14,18 @@ import { Form as FormAccessibility } from '../AddAccessibility';
 import { useToast } from '../../../hooks/toast';
 
 import { Container, Content } from './styles';
+import { useFocusEffect } from '@react-navigation/native';
 
 export function Form() {
-  const formRef = useRef(null)
-
   const [loading, setLoading] = useState(false);
   const [pageForm, setPageForm] = useState(1);
   const [selectRate, setSelectRate] = useState({});
   const [selectCommerce, setSelectCommerce] = useState({});
   const [access, setAccess] = useState([]);
+
+  const methods = useForm<any>({
+    resolver: zodResolver(pageForm === 1 ? firstSchema : secondSchema)
+  })
 
   const { addToast } = useToast();
   // const { dataAuth } = useAuth();
@@ -59,65 +64,58 @@ export function Form() {
   //     .finally(() => setLoading(false));
   // }
 
-  async function handleRegisteComment(data) {
-    try {
+  async function handleRegisteComment() {
+    if (pageForm === 1) {
+      setPageForm(2)
 
-      // await handleFirebaseAddComment(data);
-
-    } catch (err) { 
-      const error = {
-        type: 'error', 
-        title: 'Ocorreu um erro', 
-        description: 'Não foi possível cadastrar o comentário',
-      }
-      // addToast(error);
+      return
     }
+
+    // try {
+
+    //   // await handleFirebaseAddComment(data);
+
+    // } catch (err) { 
+    //   const error = {
+    //     type: 'error', 
+    //     title: 'Ocorreu um erro', 
+    //     description: 'Não foi possível cadastrar o comentário',
+    //   }
+    //   // addToast(error);
+    // }
   }
 
   useFocusEffect(
-    useCallback (() => {
-      formRef.current.setErrors({});
-      
-      // formRef.current.setData({
-      //   name: '',
-      //   address: '',
-      //   comment: '',
-      //   accessibility: '',
-      // })  
-
-      setPageForm(1);
-    }, [])
-  );
+    useCallback(() => {
+      methods.reset()
+    }, [methods.reset])
+  )
 
   return (
     <Container>
       <KeyboardAvoidingView behavior="position" enabled>
-        <Unform ref={formRef} onSubmit={handleRegisteComment}>
+        {/* <Unform ref={formRef} onSubmit={handleRegisteComment}> */}
+        <FormProvider {...methods} >
           <Content
-             opacity={pageForm === 1 ? 1 : 0}
-             height={pageForm === 1 ? 'auto' : 0}
+            opacity={pageForm === 1 ? 1 : 0}
+            height={pageForm === 1 ? 'auto' : 0}
           >
-            <FormComment 
-              callBack={() =>  setPageForm(2)}
+            <FormComment
+              callBack={handleRegisteComment}
               loading={loading}
-              formRef={formRef}
-              getSelectRate={setSelectRate}
-              getSelectCommerce={setSelectCommerce}
             />
           </Content>
-          <Content 
-             opacity={pageForm === 1 ? 0 : 1}
-             height={pageForm === 1 ? 0 : 'auto'}
+          <Content
+            opacity={pageForm === 1 ? 0 : 1}
+            height={pageForm === 1 ? 0 : 'auto'}
           >
             <FormAccessibility 
-              callBack={() => setPageForm(1)}
-              onSubmit={() => formRef.current.submitForm()}
-              // loading={loading}
-              getAccess={setAccess}
-              formRef={formRef}
+              callBack={handleRegisteComment}
+              loading={loading}
             />
           </Content>
-        </Unform>
+        </FormProvider>
+        {/* </Unform> */}
       </KeyboardAvoidingView>
     </Container>
   )
