@@ -53,7 +53,7 @@ export function CustomDrawer( props: any ) {
         </FooterButtons>
         <FooterButtons
           onPress={() => {
-            // dispatch(logoff())
+            dispatch(logoff())
 
             addToast({
               type: 'success', 

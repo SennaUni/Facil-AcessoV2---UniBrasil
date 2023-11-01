@@ -32,7 +32,6 @@ export type RootDrawerNavigator = {
 const { Screen, Navigator } = createDrawerNavigator<RootDrawerNavigator>()
 
 export function DrawerRoutes() {
-    // const user = useAppSelector((state) => state.auth && state.auth.user)
   const { user } = useAppSelector((state) => state.auth)
 
     return (

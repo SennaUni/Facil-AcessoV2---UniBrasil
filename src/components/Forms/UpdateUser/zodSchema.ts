@@ -23,7 +23,7 @@ export const schema = z.object({
     acessibility: z.object({
         icon: z.string(),
         value: z.string(),
-        id: z.string(),
+        id: z.number(),
     }, {
         required_error: 'required',
         invalid_type_error: 'type',

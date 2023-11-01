@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { Container, Content, Icon, Text } from './styles';
 
-type DefaltTableParams = { 
+export type DefaltTableParams = { 
   id: number
   icon: string
   descricao: string

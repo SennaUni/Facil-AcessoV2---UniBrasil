@@ -19,7 +19,7 @@ const store = configureStore({
         myFavorite: myFavoriteSlice,
     },
     middleware: [thunk as ThunkMiddleware],
-});
+})
 
 export default store
 

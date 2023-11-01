@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+import { likeCommentApiRequest } from '../../api/commentRequests';
+
+import { listMyComment } from '../../store/slices/myCommentSlice';
+import { listMyFavorite } from '../../store/slices/myFavoriteSlice';
+import { listComment } from '../../store/slices/commentSlice';
 
 import { View } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
 
-import { useAppSelector } from '../../hooks/redux';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 
 import { Deatils } from '../Details';
 import { useToast } from '../../hooks/toast';
@@ -12,6 +18,8 @@ import { useToast } from '../../hooks/toast';
 import { Container, Icon, Header, Content, Address, AddressText, Buttons, IconButton } from './styles';
 
 export function Card({item}) {
+  const [loading, setLoading] = useState<boolean>(false)
+  
   const rates = [
     { icon: 'meh-o', value: 'Recomendo' },
     { icon: 'smile-o', value: 'Super recomendo' },
@@ -20,52 +28,31 @@ export function Card({item}) {
 
   const { user } = useAppSelector((state) => state.auth)
 
-  const { addToast } = useToast();
+  const { addToast } = useToast()
+  const dispatch = useAppDispatch()
 
-  const isFav = false
-  // const isFav = item.data.liked_by 
-  //   ? item.data.liked_by.includes(dataAuth.uid)
-  //   : false;
+  async function addFavoritos(item: any) {
+    setLoading(true)
 
-  function addFavoritos() {
-    console.log('Adicionar aos Favoritos')
+    try {
+      await likeCommentApiRequest({
+        idComentario: item.id,
+        idUsuario: user.id,
+        curtido: !item.curtido
+      })
 
-    // if (!dataAuth.uid) return;
-
-    // const data = item.data.liked_by 
-    //   ? [...item.data.liked_by] 
-    //   : [];
-
-    //   isFav
-    //   ? data.splice(data.findIndex(item => item === dataAuth.uid), 1)
-    //   : data.push(dataAuth.uid)
-
-    // firestore()
-    //   .collection('comments')
-    //   .doc(item.id)
-    //   .update({
-    //     liked_by: data,
-    //   })
-    //   .then(() => {
-    //     const success = {
-    //       type: 'success', 
-    //       title: 'Operação realizada com sucesso', 
-    //       description: 'Comentário adicionado aos favoritos',
-    //     }
-
-    //     addToast(success);
-    //   })
-    //   .catch((err) => { 
-    //     console.log(err)
-
-    //     const error = {
-    //       type: 'error', 
-    //       title: 'Ocorreu um erro', 
-    //       description: 'Erro ao favoritar comentário',
-    //     }
-
-    //     addToast(error);
-    //     });
+     dispatch(listComment(user.id))
+     dispatch(listMyComment(user.id))
+     dispatch(listMyFavorite(user.id))
+    } catch (err) {
+      addToast({
+        title: 'Ops, ocorreu um erro!',
+        description: err.message,
+        type: 'error'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -87,13 +74,13 @@ export function Card({item}) {
       >
         <Icon colors={[ '#A88BEB', '#8241B8' ]}>
           <FontAwesome
-            name={rates[1].icon as any}
+            name={rates[item.nivelSatisfacao - 1].icon as any}
             size={30}
             color='#FFF'
           />
         </Icon>
       </View>
-      <Header>{item.nomeEstabelecimento} </Header>
+      <Header>{item.nomeEstabelecimento}</Header>
       <Content>
         <Address>
           <FontAwesome 
@@ -108,10 +95,10 @@ export function Card({item}) {
 
         <Buttons>
           <IconButton
-            onPress={addFavoritos}
+            onPress={() => !loading && addFavoritos(item)}
           >
             <FontAwesome 
-              name={isFav ? 'heart' : 'heart-o'} 
+              name={item.curtido as boolean ? 'heart' : 'heart-o'} 
               size={24} 
               color="#8241B8"
             />

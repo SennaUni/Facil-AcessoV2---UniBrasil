@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 
 import { TouchableOpacity, StatusBar } from 'react-native';
 
+import { useToast } from '../../hooks/toast'; 
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
@@ -22,8 +23,9 @@ export function Principal() {
 
   const { navigate } = useNavigation()
   const dispatch = useAppDispatch()
+  const { addToast } = useToast()
 
-  const { user } = useAppSelector((state) => state.auth)
+  const { user, sucess } = useAppSelector((state) => state.auth)
   const { acessibility } = useAppSelector((state) => state.acessibility)
   const { commerce } = useAppSelector((state) => state.commerce)
   const { comment } = useAppSelector((state) => state.comment)
@@ -40,7 +42,7 @@ export function Principal() {
     useCallback(() => {
       const GetAcessibility = () => dispatch(listAcessibility())
       const GetCommerce = () => dispatch(listCommerce())
-      const GetComment = () => dispatch(listComment())
+      const GetComment = () => dispatch(listComment(user.id))
 
       if (!acessibility) GetAcessibility()
       if (!commerce) GetCommerce()
@@ -49,8 +51,14 @@ export function Principal() {
   )
 
   useEffect(() => {
-    if (!user) navigate("login" as never)
-  }, [user])
+    if (sucess) {
+      addToast({
+        title: 'Login realizado com sucesso!',
+        description: 'Seja bem vindo ao fácil acesso',
+        type: 'success'
+      })
+    }
+  }, [sucess])
 
   return (
     <Container

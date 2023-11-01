@@ -1,8 +1,14 @@
 import React, { useState, useRef, useCallback } from 'react';
 
-import { KeyboardAvoidingView, View } from 'react-native';
+import { listComment } from '../../../store/slices/commentSlice';
+import { listMyComment } from '../../../store/slices/myCommentSlice';
+import { listMyFavorite } from '../../../store/slices/myFavoriteSlice';
+
+import { createCommentApiRequest } from '../../../api/commentRequests';
 
 import { useForm, FormProvider } from 'react-hook-form';
+import { useNavigation } from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { FormData as firstFormData, schema as firstSchema } from '../AddComment/zodSchema'
@@ -17,18 +23,19 @@ import { Container, Content } from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 
 export function Form() {
-  const [loading, setLoading] = useState(false);
-  const [pageForm, setPageForm] = useState(1);
-  const [selectRate, setSelectRate] = useState({});
-  const [selectCommerce, setSelectCommerce] = useState({});
-  const [access, setAccess] = useState([]);
+  const [loading, setLoading] = useState(false)
+  const [pageForm, setPageForm] = useState(1)
+  const [commentData, setCommentData] = useState<any>()
 
   const methods = useForm<any>({
     resolver: zodResolver(pageForm === 1 ? firstSchema : secondSchema)
   })
 
-  const { addToast } = useToast();
-  // const { dataAuth } = useAuth();
+  const { user } = useAppSelector((state) => state.auth)
+
+  const { addToast } = useToast()
+  const { navigate } = useNavigation()
+  const dispatch = useAppDispatch()
 
   // async function handleFirebaseAddComment({ address, comment, name }) {
   //   firestore()
@@ -64,25 +71,56 @@ export function Form() {
   //     .finally(() => setLoading(false));
   // }
 
-  async function handleRegisteComment() {
+  async function handleRegisteComment(data: any) {
     if (pageForm === 1) {
+      setCommentData(data)
       setPageForm(2)
-
       return
     }
 
-    // try {
+    console.log('Show de bola familia')
+    console.log(data)
+    console.log(commentData)
 
-    //   // await handleFirebaseAddComment(data);
+    setLoading(true)
 
-    // } catch (err) { 
-    //   const error = {
-    //     type: 'error', 
-    //     title: 'Ocorreu um erro', 
-    //     description: 'Não foi possível cadastrar o comentário',
-    //   }
-    //   // addToast(error);
-    // }
+    try {
+      await createCommentApiRequest({
+        estabelecimentoId: 1,
+        nomeEstabelecimento: 'nome teste',
+        rua: 'rua teste',
+        numero: 125,
+        complemento: 'adas',
+        bairro: 'bairro teste',
+        estado: 'estado teste',
+        cidade: 'cidade teste',
+        cep: 'cep teste',
+        nivelSatisfacao: 2,
+        comentario: 'comentario teste',
+        usuario: user.id,
+        acessibilidade: [1]
+      })
+
+      addToast({
+        type: 'success',
+        title: 'Operação realizada com sucesso',
+        description: 'Comentário cadastrado',
+      })
+
+      dispatch(listComment(user.id))
+      dispatch(listMyComment(user.id))
+      dispatch(listMyFavorite(user.id))
+
+      navigate('principal' as never)
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: 'Ocorreu um erro',
+        description: 'Não foi possível cadastrar o comentário',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   useFocusEffect(
@@ -93,30 +131,27 @@ export function Form() {
 
   return (
     <Container>
-      <KeyboardAvoidingView behavior="position" enabled>
-        {/* <Unform ref={formRef} onSubmit={handleRegisteComment}> */}
-        <FormProvider {...methods} >
-          <Content
-            opacity={pageForm === 1 ? 1 : 0}
-            height={pageForm === 1 ? 'auto' : 0}
-          >
-            <FormComment
-              callBack={handleRegisteComment}
-              loading={loading}
-            />
-          </Content>
-          <Content
-            opacity={pageForm === 1 ? 0 : 1}
-            height={pageForm === 1 ? 0 : 'auto'}
-          >
-            <FormAccessibility 
-              callBack={handleRegisteComment}
-              loading={loading}
-            />
-          </Content>
-        </FormProvider>
-        {/* </Unform> */}
-      </KeyboardAvoidingView>
+      <FormProvider {...methods} >
+        <Content
+          opacity={pageForm === 1 ? 1 : 0}
+          height={pageForm === 1 ? 'auto' : 0}
+        >
+          <FormComment
+            callBack={(data: any) => handleRegisteComment(data)}
+            loading={loading}
+          />
+        </Content>
+        <Content
+          opacity={pageForm === 1 ? 0 : 1}
+          height={pageForm === 1 ? 0 : 'auto'}
+        >
+          <FormAccessibility
+            callBack={(data: any) => handleRegisteComment(data)}
+            callReturn={() => setPageForm(1)}
+            loading={loading}
+          />
+        </Content>
+      </FormProvider>
     </Container>
   )
 }

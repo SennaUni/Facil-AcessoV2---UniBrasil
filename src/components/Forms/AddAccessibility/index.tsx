@@ -1,137 +1,63 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 
-import { KeyboardAvoidingView, View, Dimensions } from 'react-native';
+import { listAcessibility } from '../../../store/slices/acessibilitySlice';
 
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { View, Dimensions } from 'react-native';
 
-import { Feather } from '@expo/vector-icons';
-
-import { z } from 'zod';
-import { schema, FormData } from './zodSchema';
+import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Buttom } from '../../Basics/Buttom';
 import { Input } from '../../Basics/Input';
 import { ArrowButtom } from '../../Basics/ArrowButtom';
 import { Select } from '../../Basics/Select';
 import { OptionSelect } from '../../Basics/OptionSelect';
-import { DataTable } from '../../DataTable/Accessibilities';
+import { DataTable, DefaltTableParams } from '../../DataTable/Accessibilities';
 import { Header } from '../../Header';
-
-import { useToast } from '../../../hooks/toast';
 
 import { useFormContext } from 'react-hook-form'
 
-import { Container, ErrorContainer, Error } from './styles';
+import { Container } from './styles';
 
 const { width } = Dimensions.get('window');
 
 export type FormParam = {
-  callBack: () => void
+  callBack: (data: any) => void
+  callReturn: () => void,
   loading: boolean
 }
 
-export function Form({ callBack, loading }: FormParam) {
-  const { addToast } = useToast();
-  const { navigate } = useNavigation();
+export function Form({ callBack, callReturn, loading }: FormParam) {
+  const [acessibilities, setAcessibilities] = useState<DefaltTableParams[]>([] as DefaltTableParams[])
 
-  const { control, getValues, setError, handleSubmit } = useFormContext()
+  const { acessibility } = useAppSelector((state) => state.acessibility)
 
-  // function onSubmitForm() {
-  //   setLoading(true);
+  const dispatch = useAppDispatch()
 
-  //   if (accessibilities.length === 0) {
-  //     addToast({
-  //       type: 'error', 
-  //       title: 'Ocorreu um erro', 
-  //       description: 'Nenhuma acessibilidade cadastrada',
-  //     })
+  const { control, handleSubmit, setValue } = useFormContext()
 
-  //     setLoading(false)
-  //     return
-  //   } 
+  const handleChangeValues = (data: any) => {
+    setAcessibilities([
+      ...acessibilities,
+      { descricao: data.accessibilityText, icon: data.acessibilityOption.icon, id: acessibilities.length }
+    ])
 
-  //   getAccess(accessibilities);
+    setValue('accessibilityText', '')
+  }
 
-  //   // setTimeout(() => {
-  //   //   onSubmit();
-  //   //   setLoading(false);
-  //   //   navigate('principal');
-  //   // }, 1000);
-  // }
+  const selectOptions = acessibility
+    ? acessibility.map(value => ({
+      id: value.id,
+      icon: value.icon,
+      value: value.descricao,
+    }))
+    : []
 
-  // async function handleAddAccess() {
-  //   try {
-  //     const data = formRef.current.getData();
-
-  //     formRef.current.setErrors({});
-
-  //     if (!select) {
-  //       setError(true);
-  //       await schema.parseAsync(data)
-  //       return;
-  //     } 
-        
-  //     setError(false);
-
-  //     await schema.parseAsync(data)
-
-  //     // const access ={
-  //     //   descricao: data.accessibility,
-  //     //   acessibilidade: select.value,
-  //     //   icon: select.icon,
-  //     // };
-
-  //     setAccessibilities([
-  //       ...accessibilities,
-  //       // access,
-  //     ]);  
-      
-  //     addToast({
-  //       type: 'success', 
-  //       title: 'Acessibilidade cadastrada', 
-  //       description: 'Acessibilidade cadastrada com sucesso',
-  //     })
-
-  //   } catch (err) {
-  //     const validationErrors = {};
-      
-  //     if (err instanceof z.ZodError) {
-  //       err.errors.forEach(error => {
-  //         validationErrors[error.path[0]] = error.message;
-  //       });
-
-  //       formRef.current.setErrors(validationErrors);
-  //     }
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   setError(false);
-
-  //     formRef.current.setErrors({});
-      
-  //     formRef.current.setData({
-  //       accessibility: '',
-  //     })  
-  // }, [accessibilities])
-
-  // useFocusEffect(
-  //   useCallback (() => {
-  //     setError(false);
-
-  //     // const AccessOptions = () => {
-  //     //   firestore()
-  //     //     .collection('accessibility')
-  //     //     .get()
-  //     //     .then((value) => {
-  //     //       const data = value.docs.map(doc => doc.data())
-  //     //       setOptions(data);
-  //     //     })
-  //     // }
-  
-  //     // AccessOptions();
-  //   }, [])
-  // );
+  useFocusEffect(
+    useCallback(() => {
+      if (!acessibility) dispatch(listAcessibility())
+    }, [acessibility])
+  )
 
   return (
     <Container>
@@ -143,10 +69,10 @@ export function Form({ callBack, loading }: FormParam) {
         }}
       >
         <ArrowButtom
-          // loading={loading}
+          loading={loading}
           reverse={true}
-          gradient={[ '#A88BEB', '#8241B8' ]}
-          onPress={() => callBack()}
+          gradient={['#A88BEB', '#8241B8']}
+          onPress={callReturn}
         />
       </View>
 
@@ -159,44 +85,44 @@ export function Form({ callBack, loading }: FormParam) {
       >
         <ArrowButtom
           loading={loading}
-          gradient={[ '#A88BEB', '#8241B8' ]}
-          // onPress={handleSubmit(callBack)}
-          onPress={() => console.log('Teria q voltar ne')}
+          gradient={['#A88BEB', '#8241B8']}
+          onPress={() => acessibilities.length > 0 && callBack(acessibilities)}
         />
       </View>
 
-      <Header 
+      <Header
         title='Acessibilidades presentes'
       />
 
-      {/* { accessibilities && <DataTable data={accessibilities} /> } */}
+      {acessibilities.length > 0 && <DataTable data={acessibilities} />}
 
-      <KeyboardAvoidingView behavior="position" enabled>
-          {/* <Select 
-            options={options}
-            icon="universal-access"
-            placeholder="Defina a acessibilidade"
-            header='Selecione a acessibilidade'
-            label="Usuario"
-            OptionComponent={OptionSelect}
-            onChange={setSelect}
-          /> */}
+      <Select
+        control={control}
+        name='acessibilityOption'
+        options={selectOptions}
+        defaultValue={undefined}
+        icon="universal-access"
+        placeholder="Defina a acessibilidade"
+        header='Selecione a acessibilidade'
+        label="Usuario"
+        OptionComponent={OptionSelect}
+        onChange={setValue}
+      />
 
-          <Input
-            name="accessibility"
-            icon="pen-tool"
-            placeholder="Descreva a accessibilidade"
-            multiline
-            numberOfLines={3}
-            control={control}
-          />
+      <Input
+        name="accessibilityText"
+        icon="pen-tool"
+        placeholder="Descreva a accessibilidade"
+        multiline
+        numberOfLines={3}
+        control={control}
+      />
 
-          <Buttom
-            title="Cadastrar"
-            onPress={handleSubmit(callBack)}
-          />
+      <Buttom
+        title="Cadastrar"
+        onPress={handleSubmit(handleChangeValues)}
+      />
 
-      </KeyboardAvoidingView>
     </Container>
   )
 }

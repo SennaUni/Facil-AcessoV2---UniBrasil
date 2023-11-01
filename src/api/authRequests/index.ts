@@ -65,7 +65,6 @@ export type UpdateProfilePayload = {
 export const updateProfileApiRequest = async ({ id, data }: UpdateProfileParams) => {
     try {
         const response = await api.put(`/usuario/${id}`, data)
-        console.log(response.data)
         return response.data
     } catch (error) {
         throw new Error(error.response.data.mensagem)

@@ -39,18 +39,26 @@ export interface CommentState {
   loading: 'idle' | 'pending';
   error: any | boolean;
   sucess: any | boolean;
+
+  loadingLike: 'idle' | 'pending';
+  errorLike: any | boolean;
+  sucessLike: any | boolean;
 }
 
 const initialState: CommentState = {
   comment: null,
   loading: 'idle',
   error: false,
-  sucess: false
+  sucess: false,
+
+  loadingLike: 'idle',
+  errorLike: false,
+  sucessLike: false,
 }
 
-export const listComment = createAsyncThunk('comment/list', async (_, { rejectWithValue }) => {
+export const listComment = createAsyncThunk('comment/list', async (id: number, { rejectWithValue }) => {
   try {
-    const response = await commentApiRequest()
+    const response = await commentApiRequest(id)
     return response;
   } catch (error) {
     return rejectWithValue(error.message)

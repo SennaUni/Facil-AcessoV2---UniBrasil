@@ -24,11 +24,9 @@ const initialState: AcessibilityState = {
 
 export const listAcessibility = createAsyncThunk('acessibility/list', async (_, { rejectWithValue }) => {
   try {
-    console.log('Entrei')
     const response = await acessibilityApiRequest()
     return response;
   } catch (error) {
-    console.log('Dei erro', error.message)
     return rejectWithValue(error.message)
   }
 })

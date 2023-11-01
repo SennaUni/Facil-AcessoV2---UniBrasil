@@ -38,11 +38,6 @@ export function Form() {
   const { addToast } = useToast()
 
   const { loading, error, sucess } = useAppSelector((state) => state.auth)
-
-  // const loading = useAppSelector((state) => state.auth && state.auth.loading)
-  // const error = useAppSelector((state) => state.auth && state.auth.error)
-  // const sucess = useAppSelector((state) => state.auth && state.auth.sucess)
-
   async function handleUserLogin(data: FormData) {
     try {
       dispatch(loginAsync({
@@ -59,16 +54,6 @@ export function Form() {
   }
 
   useEffect(() => {
-    if (sucess) {
-      addToast({
-        title: 'Login realizado com sucesso!',
-        description: 'Seja bem vindo ao fácil acesso',
-        type: 'success'
-      })
-
-      navigate("principal" as never)
-    }
-
     if (error) {
       addToast({
         title: 'Ops, ocorreu um erro!',
@@ -76,7 +61,7 @@ export function Form() {
         type: 'error'
       })
     }
-  }, [error, sucess])
+  }, [error])
 
   return (
     <Container>

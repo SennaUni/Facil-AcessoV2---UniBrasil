@@ -70,6 +70,8 @@ const authSlice = createSlice({
     logoff: (state) => {
       state.user = null;
       state.token = null;
+      state.sucess = false;
+      state.error = false;
     }
   },
   extraReducers: (builder) => {
@@ -80,15 +82,15 @@ const authSlice = createSlice({
         state.sucess = false;
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
+        state.sucess = true;
+        state.loading = 'idle';
         state.user = action.payload.usuario;
         state.token = action.payload.token;
-        state.loading = 'idle';
-        state.sucess = true;
       })
       .addCase(loginAsync.rejected, (state, action) => {
+        state.sucess = false;
         state.loading = 'idle';
         state.error = action.payload ? action.payload : 'Erro desconhecido';
-        state.sucess = false;
       })
 
       .addCase(updateProfileAsync.fulfilled, (state, action) => {

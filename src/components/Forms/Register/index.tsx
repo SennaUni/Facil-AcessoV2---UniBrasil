@@ -38,17 +38,15 @@ export function Form() {
   const { navigate } = useNavigation()
   const dispatch = useAppDispatch()
 
-  // const { acessibility } = useAppSelector((state) => state.acessibility)
+  const { acessibility } = useAppSelector((state) => state.acessibility)
 
-  // const selectOptions = acessibility
-  //   ? acessibility.map(value => ({
-  //     id: value.id,
-  //     icon: value.icon,
-  //     value: value.descricao,
-  //   }))
-  //   : []
-
-    const selectOptions = []
+  const selectOptions = acessibility
+    ? acessibility.map(value => ({
+      id: value.id,
+      icon: value.icon,
+      value: value.descricao,
+    }))
+    : []
 
   async function handleUserRegister(data: FormData) {
     setLoading(true)
@@ -88,13 +86,13 @@ export function Form() {
     }, [reset])
   )
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const GetAcessibility = () => dispatch(listAcessibility())
+  useFocusEffect(
+    useCallback(() => {
+      const GetAcessibility = () => dispatch(listAcessibility())
 
-  //     if (!acessibility) GetAcessibility()
-  //   }, [acessibility])
-  // )
+      if (!acessibility) GetAcessibility()
+    }, [acessibility])
+  )
 
   return (
     <Container>
