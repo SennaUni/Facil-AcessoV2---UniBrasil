@@ -19,7 +19,7 @@ import { Container, Icon, Header, Content, Address, AddressText, Buttons, IconBu
 
 export function Card({item}) {
   const [loading, setLoading] = useState<boolean>(false)
-  
+
   const rates = [
     { icon: 'meh-o', value: 'Recomendo' },
     { icon: 'smile-o', value: 'Super recomendo' },

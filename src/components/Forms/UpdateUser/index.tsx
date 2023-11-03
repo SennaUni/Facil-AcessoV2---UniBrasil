@@ -31,8 +31,6 @@ export function Form() {
     resolver: zodResolver(schema)
   })
 
-  console.log(formState.errors)
-
   const { addToast } = useToast()
   const { navigate } = useNavigation()
   const dispatch = useAppDispatch()

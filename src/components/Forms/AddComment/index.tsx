@@ -10,7 +10,7 @@ import { useFormContext } from 'react-hook-form'
 import { Input } from '../../Basics/Input';
 import { ArrowButtom } from '../../Basics/ArrowButtom';
 import { Header } from '../../Header';
-import { Select } from '../../Basics/Select';
+import { Select, SelectedValueType } from '../../Basics/Select';
 import { OptionSelect } from '../../Basics/OptionSelect';
 
 import { Container } from './styles';
@@ -41,7 +41,7 @@ export function Form({ callBack, loading }: FormParam) {
     }))
     : []
 
-  const { control, getValues, setError, handleSubmit, setValue } = useFormContext()
+  const { control, handleSubmit, setValue, clearErrors } = useFormContext()
 
   useFocusEffect(
     useCallback(() => {
@@ -73,12 +73,6 @@ export function Form({ callBack, loading }: FormParam) {
           placeholder="Nome estabalecimento"
           control={control}
         />
-        <Input
-          name="address"
-          icon="map-pin"
-          placeholder="Endereço"
-          control={control}
-        />
 
         <Select
           options={rates}
@@ -87,7 +81,10 @@ export function Form({ callBack, loading }: FormParam) {
           placeholder="Defina sua satisfação"
           header='Selecione sua satisfação'
           OptionComponent={OptionSelect}
-          onChange={setValue}
+          onChange={(name: string, item: SelectedValueType) => { 
+            setValue(name, item)
+            clearErrors('satisfation')
+          }}
           control={control}
         />
 
@@ -98,7 +95,10 @@ export function Form({ callBack, loading }: FormParam) {
           placeholder="Defina sua categoria"
           header='Selecione sua categoria'
           OptionComponent={OptionSelect}
-          onChange={setValue}
+          onChange={(name: string, item: SelectedValueType) => { 
+            setValue(name, item)
+            clearErrors('category')
+          }}
           control={control}
         />
 

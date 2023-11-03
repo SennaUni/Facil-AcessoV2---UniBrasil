@@ -13,22 +13,43 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { FormData as firstFormData, schema as firstSchema } from '../AddComment/zodSchema'
 import { FormData as secondFormData, schema as secondSchema } from '../AddAccessibility/zodSchema'
+import { FormData as ThirdFormData, schema as ThirdSchema } from '../AddAddress/zodSchema'
 
 import { Form as FormComment } from '../AddComment';
 import { Form as FormAccessibility } from '../AddAccessibility';
+import { Form as FormAddress } from '../AddAddress';
 
 import { useToast } from '../../../hooks/toast';
 
 import { Container, Content } from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 
+type CommentDataType = {
+  address: string
+  category: SelectData
+  city: string
+  comment: string
+  name: string
+  neighborhood: string
+  number: string
+  satisfation: SelectData
+  state: SelectData
+  zipCode: string
+}
+
+export interface SelectData {
+  icon: string
+  id: number | string
+  value: string
+}
+
 export function Form() {
   const [loading, setLoading] = useState(false)
   const [pageForm, setPageForm] = useState(1)
-  const [commentData, setCommentData] = useState<any>()
+  const [commentData, setCommentData] = useState<CommentDataType>({} as CommentDataType)
 
   const methods = useForm<any>({
-    resolver: zodResolver(pageForm === 1 ? firstSchema : secondSchema)
+    resolver: zodResolver(pageForm === 1 ? firstSchema : pageForm === 2 ? ThirdSchema : secondSchema)
   })
 
   const { user } = useAppSelector((state) => state.auth)
@@ -37,68 +58,33 @@ export function Form() {
   const { navigate } = useNavigation()
   const dispatch = useAppDispatch()
 
-  // async function handleFirebaseAddComment({ address, comment, name }) {
-  //   firestore()
-  //     .collection('comments')
-  //     .add({
-  //       name,
-  //       address,
-  //       comment,
-  //       rate: selectRate,
-  //       commerce: selectCommerce,
-  //       access: access,
-  //       liked_by: '',
-  //       created_by: dataAuth.uid,
-  //       create_at: firestore.FieldValue.serverTimestamp()
-  //     })
-  //     .then(() => {
-  //       const success = {
-  //         type: 'success', 
-  //         title: 'Comentário realizado com sucesso', 
-  //         description: 'Obrigado por contribuir nessa batalha',
-  //       }
-  //       addToast(success);
-  //     })
-  //     .catch((err) => {
-  //       const error = {
-  //         type: 'error', 
-  //         title: 'Ocorreu um erro', 
-  //         description: 'Erro ao atualizar usuário',
-  //       }
-
-  //       addToast(error);
-  //     })
-  //     .finally(() => setLoading(false));
-  // }
-
   async function handleRegisteComment(data: any) {
-    if (pageForm === 1) {
-      setCommentData(data)
-      setPageForm(2)
+    if (pageForm === 1 || pageForm === 2) {
+      setCommentData({
+        ...commentData,
+        ...data
+      })
+      setPageForm(pageForm === 1 ? 2 : 3)
       return
     }
-
-    console.log('Show de bola familia')
-    console.log(data)
-    console.log(commentData)
 
     setLoading(true)
 
     try {
       await createCommentApiRequest({
-        estabelecimentoId: 1,
-        nomeEstabelecimento: 'nome teste',
-        rua: 'rua teste',
-        numero: 125,
-        complemento: 'adas',
-        bairro: 'bairro teste',
-        estado: 'estado teste',
-        cidade: 'cidade teste',
-        cep: 'cep teste',
-        nivelSatisfacao: 2,
-        comentario: 'comentario teste',
+        estabelecimentoId: Number(commentData.category.id),
+        nomeEstabelecimento: commentData.name,
+        complemento: 'asd',
+        rua: commentData.address,
+        numero: Number(commentData.number),
+        bairro: commentData.neighborhood,
+        estado: commentData.state.id.toString(),
+        cidade: commentData.city,
+        cep: commentData.zipCode,
+        nivelSatisfacao: Number(commentData.satisfation.id),
+        comentario: commentData.comment,
         usuario: user.id,
-        acessibilidade: [1]
+        acessibilidade: data.map((value: any) => value.id)
       })
 
       addToast({
@@ -126,7 +112,8 @@ export function Form() {
   useFocusEffect(
     useCallback(() => {
       methods.reset()
-    }, [methods.reset])
+      setPageForm(1)
+    }, [methods.reset, setPageForm])
   )
 
   return (
@@ -141,13 +128,25 @@ export function Form() {
             loading={loading}
           />
         </Content>
+
         <Content
-          opacity={pageForm === 1 ? 0 : 1}
-          height={pageForm === 1 ? 0 : 'auto'}
+          opacity={pageForm === 2 ? 1 : 0}
+          height={pageForm === 2 ? 'auto' : 0}
+        >
+          <FormAddress
+            callBack={(data: any) => handleRegisteComment(data)}
+            callReturn={() => setPageForm(1)}
+            loading={loading}
+          />
+        </Content>
+
+        <Content
+          opacity={pageForm === 3 ? 1 : 0}
+          height={pageForm === 3 ? 'auto' : 0}
         >
           <FormAccessibility
             callBack={(data: any) => handleRegisteComment(data)}
-            callReturn={() => setPageForm(1)}
+            callReturn={() => setPageForm(2)}
             loading={loading}
           />
         </Content>

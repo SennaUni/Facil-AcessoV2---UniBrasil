@@ -10,7 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Buttom } from '../../Basics/Buttom';
 import { Input } from '../../Basics/Input';
 import { ArrowButtom } from '../../Basics/ArrowButtom';
-import { Select } from '../../Basics/Select';
+import { Select, SelectedValueType } from '../../Basics/Select';
 import { OptionSelect } from '../../Basics/OptionSelect';
 import { DataTable, DefaltTableParams } from '../../DataTable/Accessibilities';
 import { Header } from '../../Header';
@@ -23,7 +23,7 @@ const { width } = Dimensions.get('window');
 
 export type FormParam = {
   callBack: (data: any) => void
-  callReturn: () => void,
+  callReturn: () => void
   loading: boolean
 }
 
@@ -34,12 +34,12 @@ export function Form({ callBack, callReturn, loading }: FormParam) {
 
   const dispatch = useAppDispatch()
 
-  const { control, handleSubmit, setValue } = useFormContext()
+  const { control, handleSubmit, setValue, clearErrors } = useFormContext()
 
   const handleChangeValues = (data: any) => {
     setAcessibilities([
       ...acessibilities,
-      { descricao: data.accessibilityText, icon: data.acessibilityOption.icon, id: acessibilities.length }
+      { descricao: data.accessibilityText, icon: data.acessibilityOption.icon, id: data.acessibilityOption.id }
     ])
 
     setValue('accessibilityText', '')
@@ -52,6 +52,12 @@ export function Form({ callBack, callReturn, loading }: FormParam) {
       value: value.descricao,
     }))
     : []
+
+  useFocusEffect(
+    useCallback(() => {
+      setAcessibilities([])
+    }, [setAcessibilities])
+  )
 
   useFocusEffect(
     useCallback(() => {
@@ -106,7 +112,10 @@ export function Form({ callBack, callReturn, loading }: FormParam) {
         header='Selecione a acessibilidade'
         label="Usuario"
         OptionComponent={OptionSelect}
-        onChange={setValue}
+        onChange={(name: string, item: SelectedValueType) => { 
+          setValue(name, item)
+          clearErrors('acessibilityOption')
+        }}
       />
 
       <Input

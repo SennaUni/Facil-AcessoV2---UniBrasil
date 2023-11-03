@@ -7,12 +7,6 @@ export const schema = z.object({
         .min(3, "O nome deve ter ao menos 6 dígitos")
         .max(50, "O nome deve ter ao máximo 50 dígitos")
         .refine(value => value.trim() !== '', "Informe o nome"),
-    address: z.string({
-        required_error: 'Informe o endereço'
-    })
-        .min(3, "O endereço deve ter ao menos 6 dígitos")
-        .max(50, "O endereço deve ter ao máximo 50 dígitos")
-        .refine(value => value.trim() !== '', "Informe o endereço"),
     comment: z.string({
         required_error: 'Informe o comentario'
     })

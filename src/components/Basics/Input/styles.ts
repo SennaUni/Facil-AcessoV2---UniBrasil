@@ -19,8 +19,7 @@ export const InputContainer = styled.View`
 `
 
 export const IconContainer = styled.View`
-  height: 50px;
-  max-height: 200px;
+  min-height: 50px;
   width: 55px;
   justify-content: center;
   align-items: center;
